@@ -1,6 +1,6 @@
 {
     "name": "sobhanatar/idempotent",
-    "description": "Idempotency package to make the applications idempotent",
+    "description": ":package_description",
     "license": "MIT",
     "authors": [
         {

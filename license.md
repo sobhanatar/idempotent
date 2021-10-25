@@ -1,5 +1,3 @@
 # The license
 
-Copyright (c) Author Name <author@email.com>
-
-...Add your license text here...
+Copyright (c) Sobhan Atar <atarsobhan@gmail.com>
