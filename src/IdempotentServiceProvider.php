@@ -18,10 +18,6 @@ class IdempotentServiceProvider extends ServiceProvider
         $this->app->singleton('idempotent', function ($app) {
             return new Idempotent;
         });
-
-        if (!app()->configurationIsCached()) {
-            $this->mergeConfigFrom(__DIR__ . '/../config/idempotent.php', 'idempotent');
-        }
     }
 
     /**
@@ -31,19 +27,17 @@ class IdempotentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->publishes([
+            __DIR__ . '/../database/migrations' => database_path('migrations'),
+        ], 'idempotent-migrations');
+
+        $this->publishes([
+            __DIR__ . '/../config/idempotent.php' => config_path('idempotent.php'),
+        ], 'idempotent-config');
+
         if ($this->app->runningInConsole()) {
-            $this->registerMigrations();
-
-            $this->publishes([
-                __DIR__ . '/../database/migrations' => database_path('migrations'),
-            ], 'idempotent-migrations');
-
-            $this->publishes([
-                __DIR__ . '/../config/idempotent.php' => config_path('idempotent.php'),
-            ], 'idempotent-config');
-
             $this->commands([
-                // PurgeCommand::class,
+                PurgeCommand::class,
             ]);
         }
     }
@@ -56,17 +50,5 @@ class IdempotentServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return ['idempotent'];
-    }
-
-    /**
-     * Register Sanctum's migration files.
-     *
-     * @return void
-     */
-    protected function registerMigrations(): void
-    {
-        if (Idempotent::shouldRunMigrations()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        }
     }
 }
