@@ -20,23 +20,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Idempotent Storage Driver
+    | Header name
     |--------------------------------------------------------------------------
     |
-    | This option controls the connections the package requires as idempotent
-    | provider. If app uses both database and redis in its entities then change
-    | the configuration in accordance with the app needs.
+    | This option controls the header name being used for hash in header of request
     |
     */
 
-    'storage' => [
-        'database' => [
-            'connection' => config('database.default'),
-            'table' => 'service_idempotent',
-        ],
-        'redis' => [
-            'connection' => config('database.redis.default')
-        ]
+    'header' => 'idempotent',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Idempotent Database Driver
+    |--------------------------------------------------------------------------
+    |
+    | If any of the entities you use needs to use database to provide idempotency,
+    | use following parameters to setup the database connection and tables. Please
+    | make sure you are using an RDBMS that provide transaction and table-level lock,
+    | like InnoDB.
+    |
+    */
+
+    'database' => [
+        'connection' => 'mysql',
+        'table' => 'idempotent',
     ],
 
     /*
@@ -54,8 +61,7 @@ return [
     'entities' => [
         'user' => [
             'ttl' => 3600,
-            'connection' => 'database', // or redis
-            'methods' => ['post'], // other options are put, patch, and delete
+            'connection' => 'database',
             'fields' => ['first_name', 'last_name', 'email'],
         ]
     ]

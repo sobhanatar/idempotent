@@ -4,7 +4,7 @@ namespace Sobhanatar\Idempotent\Exceptions;
 
 use Exception;
 
-class DatabaseTableNotFoundException extends Exception
+class TableNotFoundException extends Exception
 {
 
 }

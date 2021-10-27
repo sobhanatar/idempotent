@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\Schema;
 use Sobhanatar\Idempotent\Exceptions\EntityNotFoundException as IdempotentEntityNotFoundException;
-use Sobhanatar\Idempotent\Exceptions\DatabaseTableNotFoundException as IdempotentDatabaseTableNotFoundException;
+use Sobhanatar\Idempotent\Exceptions\TableNotFoundException as IdempotentDatabaseTableNotFoundException;
 
 class PurgeCommand extends Command
 {
