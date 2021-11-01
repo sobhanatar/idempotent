@@ -3,15 +3,9 @@
 namespace Sobhanatar\Idempotent\Middleware;
 
 use Closure;
+use Exception;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
-use Sobhanatar\Idempotent\Exceptions\{
-    InvalidFieldInputException,
-    InvalidConnectionException,
-    InvalidMethodException,
-    InvalidRouteTypeException,
-    InvalidEntityConfigException
-};
 
 class IdempotentVerify
 {
@@ -39,11 +33,14 @@ class IdempotentVerify
     {
         try {
             [$entityName, $entityConfig] = $this->idempotent->getEntity($request);
+            $storageService = $this->idempotent->getStorageService($entityConfig['connection']);
             $hash = $this->idempotent->createHash($request, $entityName, $entityConfig['fields']);
-            $storageImp = $this->idempotent->getStorage($entityConfig['connection']);
-            $this->idempotent->set($storageImp, $entityName, $entityConfig, $hash);
-            $request->headers->set(config('idempotent.header'), $hash);
+            [$exists, $response] = $this->idempotent->set($storageService, $entityName, $entityConfig, $hash);
+            if ($exists) {
+                return response(['message' => $response]);
+            }
 
+            $request->headers->set(config('idempotent.header'), $hash);
             $response = $next($request);
 //            dump($request->route()->getName());
 //            dump(json_encode($request->header(config('idempotent.header'))));
@@ -51,8 +48,7 @@ class IdempotentVerify
 //            dump($response->getContent());
             return response(['message' => 'WIP']);
 
-        } catch (InvalidRouteTypeException | InvalidEntityConfigException | InvalidMethodException |
-        InvalidFieldInputException | InvalidConnectionException $e) {
+        } catch (Exception $e) {
             return response(['message' => $e->getMessage()]);
         }
     }

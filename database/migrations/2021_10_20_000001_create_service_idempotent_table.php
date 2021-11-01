@@ -33,6 +33,8 @@ class CreateServiceIdempotentTable extends Migration
     public function up(): void
     {
         $this->schema->create($this->getTable(), function (Blueprint $table) {
+            $table->engine = 'InnoDB';
+
             $table->id();
             $table->string('entity')->index()->comment('entity of the hash');
             $table->string('hash')->index()->comment('the hash of configured fields');

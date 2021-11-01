@@ -31,13 +31,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Idempotent Database Driver
+    | Idempotent Storage Service
     |--------------------------------------------------------------------------
     |
     | If any of the entities you use needs to use database to provide idempotency,
-    | use following parameters to setup the database connection and tables. Please
-    | make sure you are using an RDBMS that provide transaction and table-level lock,
-    | like InnoDB.
+    | use following parameters to set the table name. Available option is mysql.
+    | Otherwise, if the requirement is redis, use `redis` in connection part of
+    | the entity.
     |
     */
 
@@ -52,17 +52,22 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here are each of the entities setup for your application. Each entity can
-    | have its own connection (databases or redis), TTL(ms), and required fields
-    | to unique a request of an entity. Notice that if an entity uses the redis
-    | provider, the name of entity will be used as redis database.
+    | have its own connection, TTL(ms), and required fields to unique a request
+    | of an entity. Notice that if an entity uses the redis provider, the name of
+    | entity will be used as redis database.
     |
     */
 
     'entities' => [
-        'user' => [
+        'users-post' => [
             'ttl' => 3600,
-            'connection' => 'database',
+            'connection' => 'mysql',
             'fields' => ['first_name', 'last_name', 'email'],
-        ]
+        ],
+        'news-post' => [
+            'ttl' => 3600,
+            'connection' => 'redis',
+            'fields' => ['title', 'summary'],
+        ],
     ]
 ];

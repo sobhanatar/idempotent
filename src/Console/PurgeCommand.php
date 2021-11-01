@@ -6,8 +6,8 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\Facades\Schema;
-use Sobhanatar\Idempotent\Exceptions\EntityNotFoundException as IdempotentEntityNotFoundException;
-use Sobhanatar\Idempotent\Exceptions\TableNotFoundException as IdempotentDatabaseTableNotFoundException;
+use InvalidArgumentException;
+use Sobhanatar\Idempotent\Exceptions\TableNotFoundException;
 
 class PurgeCommand extends Command
 {
@@ -75,13 +75,13 @@ class PurgeCommand extends Command
         $entities = collect(config('idempotent.entities'))->keys()->toArray();
 
         if (!$this->schema->hasTable($this->getTable())) {
-            throw new IdempotentDatabaseTableNotFoundException(
+            throw new TableNotFoundException(
                 sprintf("The table is missing. Table name is `%s`", $this->getTable())
             );
         }
 
         if (!$entity || !in_array($entity, $entities, true)) {
-            throw new IdempotentEntityNotFoundException(
+            throw new InvalidArgumentException(
                 sprintf("The entity is missing or not correct. Use one of these: [%s]", implode(', ', $entities))
             );
         }

@@ -2,53 +2,63 @@
 
 namespace Sobhanatar\Idempotent;
 
+use Exception;
+use InvalidArgumentException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
-use Sobhanatar\Idempotent\Contracts\RedisStorage;
-use Sobhanatar\Idempotent\Contracts\DatabaseStorage;
-use Sobhanatar\Idempotent\Contracts\StorageInterface;
 use Symfony\Component\HttpFoundation\Request as SymphonyRequest;
-use Sobhanatar\Idempotent\Exceptions\{InvalidConnectionException,
-    InvalidFieldInputException,
-    InvalidRouteTypeException,
-    InvalidMethodException,
-    InvalidEntityConfigException
-};
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Sobhanatar\Idempotent\Contracts\{RedisStorage, MysqlStorage, StorageInterface};
 
 class Idempotent
 {
     private const SEPARATOR = '-';
-    private const DATABASE = 'database';
-    private const CACHE = 'cache';
+    private const ROUTE_SEPARATOR = '.';
 
     /**
-     * Get entity from request route's name
+     * Get the entity's name from the route's name and then acquire its config
      *
      * @param Request $request
      * @return array
-     * @throws InvalidEntityConfigException
-     * @throws InvalidMethodException
-     * @throws InvalidRouteTypeException
+     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function getEntity(Request $request): array
     {
         $route = $request->route();
         if (!$route instanceof Route) {
-            throw new InvalidRouteTypeException('Route is not defined');
+            throw new Exception('Route is not defined');
         }
 
-        $entity = str_replace('.', '-', $route->getName());
+        $entity = str_replace(self::ROUTE_SEPARATOR, self::SEPARATOR, $route->getName());
         $config = config(sprintf('idempotent.entities.%s', $entity));
         if (!isset($config)) {
-            throw new InvalidEntityConfigException(sprintf('Entity `%s` does not exists', $entity));
+            throw new InvalidArgumentException(sprintf('Entity `%s` does not exists', $entity));
         }
 
         if (strtoupper($request->method()) !== SymphonyRequest::METHOD_POST) {
-            throw new InvalidMethodException('Route method is not POST');
+            throw new MethodNotAllowedException([SymphonyRequest::METHOD_POST], 'Route method is not POST');
         }
 
         return [$entity, $config];
+    }
+
+    /**
+     * Get the required storage based on entity connection
+     *
+     * @throws InvalidArgumentException
+     */
+    public function getStorageService(string $connection): StorageInterface
+    {
+        switch ($connection) {
+            case 'mysql':
+                return new MysqlStorage(DB::connection('mysql')->getPdo());
+            case 'redis':
+                return new RedisStorage();
+            default:
+                throw new InvalidArgumentException(sprintf('connection `%s` is not supported', $connection));
+        }
     }
 
     /**
@@ -56,14 +66,14 @@ class Idempotent
      * @param string $entityName
      * @param array $fields
      * @return string
-     * @throws InvalidFieldInputException
+     * @throws InvalidArgumentException
      */
     public function createHash(Request $request, string $entityName, array $fields): string
     {
         $data[] = $entityName;
         foreach ($fields as $field) {
             if (!($value = $request->input($field))) {
-                throw new InvalidFieldInputException(sprintf('%s is in field but not on request inputs', $field));
+                throw new InvalidArgumentException(sprintf('%s is in field but not on request inputs', $field));
             }
             $data[] = $value;
         }
@@ -72,24 +82,17 @@ class Idempotent
     }
 
     /**
-     * Get the required storage based on entity connection
+     * Set data into shared memory
      *
-     * @throws InvalidConnectionException
+     * @param StorageInterface $storage
+     * @param string $entityName
+     * @param array $entityConfig
+     * @param string $hash
+     * @return array
+     * @throws Exception
      */
-    public function getStorage(string $connection): StorageInterface
+    public function set(StorageInterface $storage, string $entityName, array $entityConfig, string $hash): array
     {
-        switch ($connection) {
-            case self::DATABASE:
-                return new DatabaseStorage();
-            case self::CACHE:
-                return new RedisStorage();
-            default:
-                throw new InvalidConnectionException(sprintf('connection `%s` is not supported', $connection));
-        }
-    }
-
-    public function set(StorageInterface $storage, string $entityName, array $entityConfig, string $hash): void
-    {
-        $storage->set($entityName, $entityConfig, $hash);
+        return $storage->set($entityName, $entityConfig, $hash);
     }
 }
