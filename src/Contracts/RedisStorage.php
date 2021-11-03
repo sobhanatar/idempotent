@@ -31,7 +31,7 @@ LUA, 2, 'first-counter', 'second-counter');
     /**
      * @inheritDoc
      */
-    public function update(array $data)
+    public function update(Response $response)
     {
         // TODO: Implement update() method.
     }

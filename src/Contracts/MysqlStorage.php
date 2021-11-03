@@ -2,6 +2,7 @@
 
 namespace Sobhanatar\Idempotent\Contracts;
 
+use Illuminate\Http\Response;
 use PDO;
 use Exception;
 use malkusch\lock\mutex\MySQLMutex;
@@ -46,9 +47,28 @@ class MysqlStorage implements StorageInterface
     /**
      * @inheritDoc
      */
-    public function update(array $data)
+    public function update($response, string $entity, string $hash): void
     {
-        // TODO: Implement update() method.
+        $sql = sprintf(
+            "%s %s",
+            "UPDATE {$this->table} SET status=:status, response=:response, updated_ut=:updated_ut, updated_at=:updated_at",
+            "WHERE entity=:entity and hash=:hash"
+        );
+        $now = now();
+        $data = [
+            'response' => $response->getContent(),
+            'entity' => $entity,
+            'hash' => $hash,
+            'updated_ut' => $now->unix(),
+            'updated_at' => $now->format('Y-m-d H:i:s'),
+        ];
+        $statusCode = $response->getStatusCode();
+        $data['status'] = 'fail';
+        if ($statusCode >= 200 && $statusCode < 300) {
+            $data['status'] = 'done';
+        }
+
+        $this->pdo->prepare($sql)->execute($data);
     }
 
     /**
@@ -61,11 +81,11 @@ class MysqlStorage implements StorageInterface
     private function check(string $entity, string $hash): array
     {
         $sql = sprintf(
-            "SELECT `id`, `status`, `response` FROM %s WHERE `entity` = '%s' AND `hash` = '%s' AND `expired_ut` > %d ORDER BY `id` DESC LIMIT 1",
+            "SELECT `id`, `status`, `response` FROM %s WHERE `entity` = '%s' AND `expired_ut` > %d AND `hash` = '%s' ORDER BY `id` DESC LIMIT 1",
             $this->table,
             $entity,
+            now()->unix(),
             $hash,
-            now()->unix()
         );
 
         $result = $this->pdo->query($sql)->fetch();

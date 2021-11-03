@@ -7,7 +7,7 @@ use Exception;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
 
-class IdempotentVerify
+class IdempotentHash
 {
     /**
      * @var Idempotent $idempotent
@@ -33,19 +33,10 @@ class IdempotentVerify
     {
         try {
             [$entityName, $entityConfig] = $this->idempotent->getEntity($request);
-            $storageService = $this->idempotent->getStorageService($entityConfig['connection']);
             $hash = $this->idempotent->createHash($request, $entityName, $entityConfig['fields']);
+            $request->headers->set(config('idempotent.header'), $hash);
 
-            [$exists, $result] = $this->idempotent->set($storageService, $entityName, $entityConfig, $hash);
-            if ($exists) {
-                $response = $this->idempotent->prepareResponse($entityName, $result['response']);
-                return response($response);
-            }
-
-            /**@var Response $response */
-            $response = $next($request);
-            $this->idempotent->update($storageService, $response, $entityName, $hash);
-            return response($response->getContent(), $response->getStatusCode());
+            return $next($request);
 
         } catch (Exception $e) {
             return response(['message' => $e->getMessage()]);

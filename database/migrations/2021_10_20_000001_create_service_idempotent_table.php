@@ -42,9 +42,12 @@ class CreateServiceIdempotentTable extends Migration
             $table->text('response')->nullable(true)->comment('the complete body of response should be returned');
             $table->unsignedInteger('expired_ut')->comment('the expire time in unix timestamp');
             $table->unsignedInteger('created_ut')->comment('the creation time in unix timestamp');
-            $table->timestamp('created_at')->useCurrent()->comment('the creation timestamp');
+            $table->timestamp('created_at')->comment('the creation timestamp');
+            $table->unsignedInteger('updated_ut')->comment('the updating time in unix timestamp');
+            $table->timestamp('updated_at')->comment('the updating timestamp');
 
-            $table->index(['entity', 'hash', 'expired_ut']);
+            $table->index(['entity', 'expired_ut', 'hash']);
+            $table->index(['entity', 'hash']);
         });
     }
 

@@ -3,6 +3,8 @@
 namespace Sobhanatar\Idempotent\Contracts;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use malkusch\lock\exception\LockAcquireException;
 use malkusch\lock\exception\LockReleaseException;
 use malkusch\lock\exception\ExecutionOutsideLockException;
@@ -29,8 +31,10 @@ interface StorageInterface
     /**
      * Update hash in storage
      *
-     * @param array $data
-     * @return mixed
+     * @param Response|JsonResponse $response
+     * @param string $entity
+     * @param string $hash
+     * @return void
      */
-    public function update(array $data);
+    public function update($response, string $entity, string $hash): void;
 }

@@ -98,6 +98,20 @@ class Idempotent
     }
 
     /**
+     * update data of shared storage
+     *
+     * @param StorageInterface $storage
+     * @param $response
+     * @param string $entityName
+     * @param string $hash
+     * @return void
+     */
+    public function update(StorageInterface $storage, $response, string $entityName, string $hash): void
+    {
+        $storage->update($response, $entityName, $hash);
+    }
+
+    /**
      * Prepare response
      *
      * @param string $entity
@@ -107,7 +121,7 @@ class Idempotent
      */
     public function prepareResponse(string $entity, ?string $response): string
     {
-        $res = isset($response) ?: trans('idempotent.' . $entity);
+        $res = $response ?? trans('idempotent.' . $entity);
 
         return json_encode($res, JSON_THROW_ON_ERROR);
     }
