@@ -52,21 +52,22 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here are each of the entities setup for your application. Each entity can
-    | have its own connection, TTL(ms), and required fields to unique a request
-    | of an entity. Notice that if an entity uses the redis provider, the name of
-    | entity will be used as redis database.
+    | have its own connection, TTL(ms), timeout(seconds) for locking timeout, and
+    | required fields to unique a request of an entity, .
     |
     */
 
     'entities' => [
         'users-post' => [
-            'ttl' => 3600,
             'connection' => 'mysql',
+            'ttl' => 3600,
+            'timeout' => 1,
             'fields' => ['first_name', 'last_name', 'email'],
         ],
         'news-post' => [
-            'ttl' => 3600,
             'connection' => 'redis',
+            'ttl' => 3600,
+            'timeout' => 1,
             'fields' => ['title', 'summary'],
         ],
     ]

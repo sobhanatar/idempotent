@@ -29,11 +29,15 @@ class IdempotentServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'idempotent-migrations');
+        ], 'idempotent-migration');
 
         $this->publishes([
             __DIR__ . '/../config/idempotent.php' => config_path('idempotent.php'),
         ], 'idempotent-config');
+
+        $this->publishes([
+            __DIR__ . '/../resources/lang/idempotent.php' => lang_path('en/idempotent.php'),
+        ], 'idempotent-lang');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

@@ -35,9 +35,10 @@ class IdempotentVerify
             [$entityName, $entityConfig] = $this->idempotent->getEntity($request);
             $storageService = $this->idempotent->getStorageService($entityConfig['connection']);
             $hash = $this->idempotent->createHash($request, $entityName, $entityConfig['fields']);
-            [$exists, $response] = $this->idempotent->set($storageService, $entityName, $entityConfig, $hash);
+            [$exists, $result] = $this->idempotent->set($storageService, $entityName, $entityConfig, $hash);
             if ($exists) {
-                return response(['message' => $response]);
+                $response = $this->idempotent->prepareResponse($entityName, $result['response']);
+                return response($response);
             }
 
             $request->headers->set(config('idempotent.header'), $hash);

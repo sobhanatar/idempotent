@@ -3,6 +3,7 @@
 namespace Sobhanatar\Idempotent;
 
 use Exception;
+use JsonException;
 use InvalidArgumentException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -94,5 +95,20 @@ class Idempotent
     public function set(StorageInterface $storage, string $entityName, array $entityConfig, string $hash): array
     {
         return $storage->set($entityName, $entityConfig, $hash);
+    }
+
+    /**
+     * Prepare response
+     *
+     * @param string $entity
+     * @param string|null $response
+     * @return string
+     * @throws JsonException
+     */
+    public function prepareResponse(string $entity, ?string $response): string
+    {
+        $res = isset($response) ?: trans('idempotent.' . $entity);
+
+        return json_encode($res, JSON_THROW_ON_ERROR);
     }
 }

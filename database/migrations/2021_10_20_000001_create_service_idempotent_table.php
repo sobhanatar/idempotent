@@ -38,13 +38,13 @@ class CreateServiceIdempotentTable extends Migration
             $table->id();
             $table->string('entity')->index()->comment('entity of the hash');
             $table->string('hash')->index()->comment('the hash of configured fields');
-            $table->string('status', 191)->index()->comment('the status of operation, progress, done, failure');
-            $table->text('response')->comment('the complete body of response should be returned');
+            $table->string('status', 191)->nullable(true)->comment('the status of operation, progress, done, failure');
+            $table->text('response')->nullable(true)->comment('the complete body of response should be returned');
             $table->unsignedInteger('expired_ut')->comment('the expire time in unix timestamp');
             $table->unsignedInteger('created_ut')->comment('the creation time in unix timestamp');
             $table->timestamp('created_at')->useCurrent()->comment('the creation timestamp');
 
-            $table->unique(['entity', 'hash']);
+            $table->index(['entity', 'hash', 'expired_ut']);
         });
     }
 
@@ -65,7 +65,7 @@ class CreateServiceIdempotentTable extends Migration
      */
     public function getConnection(): ?string
     {
-        return config('idempotent.storage.database.connection');
+        return config('idempotent.database.connection');
     }
 
     /**
@@ -75,6 +75,6 @@ class CreateServiceIdempotentTable extends Migration
      */
     public function getTable(): string
     {
-        return config('idempotent.storage.database.table');
+        return config('idempotent.database.table');
     }
 }
