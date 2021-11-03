@@ -2,9 +2,7 @@
 
 namespace Sobhanatar\Idempotent\Contracts;
 
-use Illuminate\Http\Response;
 use PDO;
-use Exception;
 use malkusch\lock\mutex\MySQLMutex;
 
 class MysqlStorage implements StorageInterface
@@ -25,7 +23,7 @@ class MysqlStorage implements StorageInterface
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->table = config('idempotent.database.table');
+        $this->table = config('idempotent.table');
     }
 
     /**

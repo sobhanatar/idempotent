@@ -2,37 +2,77 @@
 
 namespace Sobhanatar\Idempotent\Contracts;
 
-use Illuminate\Support\Facades\Redis;
-use Psr\SimpleCache\InvalidArgumentException;
+use Redis;
+use malkusch\lock\mutex\PHPRedisMutex;
+use Symfony\Component\HttpFoundation\Response as SymphonyResponse;
 
 class RedisStorage implements StorageInterface
 {
     /**
-     * @inheritDoc
+     * @var Redis $redis
      */
-    public function set(string $entity, array $config, string $hash): array
+    private Redis $redis;
+
+    public function __construct(Redis $redis)
     {
-        Redis::transaction(function ($redis) {
-            $redis->incr('user_visits', 1);
-            $redis->incr('total_visits', 1);
-        });
-
-        $value = Redis::eval(<<<'LUA'
-    local counter = redis.call("incr", KEYS[1])
-
-    if counter > 5 then
-        redis.call("incr", KEYS[2])
-    end
-
-    return counter
-LUA, 2, 'first-counter', 'second-counter');
+        $this->redis = $redis;
     }
 
     /**
      * @inheritDoc
      */
-    public function update(Response $response)
+    public function set(string $entity, array $config, string $hash): array
     {
-        // TODO: Implement update() method.
+        $mutex = new PHPRedisMutex([$this->redis], 'idempotent');
+        return $mutex->synchronized(function () use ($entity, $hash, $config) {
+            $key = $this->getKey($entity, $hash);
+            $result = $this->redis->get($key);
+            if ($result) {
+                return [true, unserialize($result, ['allowed_classes' => true])];
+            }
+
+            $this->redis->set(
+                $this->getKey($entity, $hash),
+                serialize(collect(['status' => 'progress', 'response' => ''])),
+                $config['ttl']
+            );
+            return [false, null];
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function update($response, string $entity, string $hash): void
+    {
+        $mutex = new PHPRedisMutex([$this->redis], 'idempotent');
+        $mutex->synchronized(function () use ($response, $entity, $hash) {
+            $key = $this->getKey($entity, $hash);
+            $result = $this->redis->exists($key);
+            if (!$result) {
+                return;
+            }
+
+            $status = 'fail';
+            $statusCode = $response->getStatusCode();
+            if ($statusCode >= SymphonyResponse::HTTP_OK && $statusCode <= SymphonyResponse::HTTP_IM_USED) {
+                $status = 'done';
+            }
+
+            $data = ['status' => $status, 'response' => $response->getContent()];
+            $this->redis->set($key, serialize(collect($data)));
+        });
+    }
+
+    /**
+     * Get redis key
+     *
+     * @param string $entity
+     * @param string $hash
+     * @return string
+     */
+    private function getKey(string $entity, string $hash): string
+    {
+        return sprintf("%s-%s", $entity, $hash);
     }
 }

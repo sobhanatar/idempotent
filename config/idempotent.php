@@ -31,19 +31,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Idempotent Storage Service
+    | Table name
     |--------------------------------------------------------------------------
     |
-    | If any of the entities you use needs to use database to provide idempotency,
-    | use following parameters to set the table name. Available option is mysql.
-    | Otherwise, if the requirement is redis, use `redis` in connection part of
-    | the entity.
+    | This table name that holds the hash of entities
     |
     */
 
-    'database' => [
-        'connection' => 'mysql',
-        'table' => 'idempotent',
+    'table' => 'idempotent',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redis connection
+    |--------------------------------------------------------------------------
+    |
+    | specify the redis connection variables
+    |
+    */
+
+    'redis' => [
+        'host' => 'localhost',
+        'port' => 6379,
+        'timeout' => 0.0,
     ],
 
     /*
@@ -52,7 +61,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here are each of the entities setup for your application. Each entity can
-    | have its own connection, TTL(ms), timeout(seconds) for locking timeout, and
+    | have its own connection, TTL(seconds), timeout(seconds) for locking timeout, and
     | required fields to unique a request of an entity, .
     |
     */
@@ -60,13 +69,13 @@ return [
     'entities' => [
         'users-post' => [
             'connection' => 'mysql',
-            'ttl' => 3600,
-            'timeout' => 1,
+            'ttl' => 100,
+            'timeout' => 5,
             'fields' => ['first_name', 'last_name', 'email'],
         ],
         'news-post' => [
             'connection' => 'redis',
-            'ttl' => 3600,
+            'ttl' => 100,
             'timeout' => 1,
             'fields' => ['title', 'summary'],
         ],

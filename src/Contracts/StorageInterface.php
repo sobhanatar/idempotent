@@ -35,6 +35,7 @@ interface StorageInterface
      * @param string $entity
      * @param string $hash
      * @return void
+     * @throws Exception
      */
     public function update($response, string $entity, string $hash): void;
 }

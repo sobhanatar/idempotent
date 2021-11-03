@@ -13,7 +13,7 @@ class CreateServiceIdempotentTable extends Migration
      *
      * @var Builder
      */
-    protected $schema;
+    protected Builder $schema;
 
     /**
      * Create a new migration instance.
@@ -68,7 +68,7 @@ class CreateServiceIdempotentTable extends Migration
      */
     public function getConnection(): ?string
     {
-        return config('idempotent.database.connection');
+        return 'mysql';
     }
 
     /**
@@ -78,6 +78,6 @@ class CreateServiceIdempotentTable extends Migration
      */
     public function getTable(): string
     {
-        return config('idempotent.database.table');
+        return config('idempotent.table');
     }
 }

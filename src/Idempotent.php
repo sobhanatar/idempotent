@@ -2,10 +2,11 @@
 
 namespace Sobhanatar\Idempotent;
 
+use Redis;
 use Exception;
 use JsonException;
-use InvalidArgumentException;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Request as SymphonyRequest;
@@ -42,6 +43,12 @@ class Idempotent
             throw new MethodNotAllowedException([SymphonyRequest::METHOD_POST], 'Route method is not POST');
         }
 
+        foreach ($config['fields'] as $field) {
+            if (!$request->input($field)) {
+                throw new InvalidArgumentException(sprintf('%s is in fields but not on request inputs', $field));
+            }
+        }
+
         return [$entity, $config];
     }
 
@@ -56,7 +63,9 @@ class Idempotent
             case 'mysql':
                 return new MysqlStorage(DB::connection('mysql')->getPdo());
             case 'redis':
-                return new RedisStorage();
+                $redis = new Redis();
+                $redis->connect(config('idempotent.redis.host'), config('idempotent.redis.port'), config('idempotent.redis.timeout'));
+                return new RedisStorage($redis);
             default:
                 throw new InvalidArgumentException(sprintf('connection `%s` is not supported', $connection));
         }
@@ -73,10 +82,7 @@ class Idempotent
     {
         $data[] = $entityName;
         foreach ($fields as $field) {
-            if (!($value = $request->input($field))) {
-                throw new InvalidArgumentException(sprintf('%s is in field but not on request inputs', $field));
-            }
-            $data[] = $value;
+            $data[] = $request->input($field);
         }
 
         return hash(config('idempotent.driver', 'sha256'), implode(self::SEPARATOR, $data));
