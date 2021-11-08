@@ -37,7 +37,7 @@ class IdempotentServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__ . '/../resources/lang/idempotent.php' => lang_path('en/idempotent.php'),
-        ], 'idempotent-lang');
+        ], 'idempotent-language');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

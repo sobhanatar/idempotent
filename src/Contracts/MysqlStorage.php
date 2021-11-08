@@ -5,7 +5,7 @@ namespace Sobhanatar\Idempotent\Contracts;
 use PDO;
 use malkusch\lock\mutex\MySQLMutex;
 
-class MysqlStorage implements StorageInterface
+class MysqlStorage implements Storage
 {
     /**
      * @var PDO $pdo

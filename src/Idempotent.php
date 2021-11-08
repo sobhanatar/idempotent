@@ -11,7 +11,7 @@ use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Request as SymphonyRequest;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
-use Sobhanatar\Idempotent\Contracts\{RedisStorage, MysqlStorage, StorageInterface};
+use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage, MysqlStorage};
 
 class Idempotent
 {
@@ -57,14 +57,21 @@ class Idempotent
      *
      * @throws InvalidArgumentException
      */
-    public function getStorageService(string $connection): StorageInterface
+    public function getStorageService(string $connection): Storage
     {
         switch ($connection) {
             case 'mysql':
                 return new MysqlStorage(DB::connection('mysql')->getPdo());
             case 'redis':
                 $redis = new Redis();
-                $redis->connect(config('idempotent.redis.host'), config('idempotent.redis.port'), config('idempotent.redis.timeout'));
+                $redis->connect(
+                    config('idempotent.redis.host'),
+                    config('idempotent.redis.port'),
+                    config('idempotent.redis.timeout'),
+                    config('idempotent.redis.reserved'),
+                    config('idempotent.redis.retryInterval'),
+                    config('idempotent.redis.readTimeout'),
+                );
                 return new RedisStorage($redis);
             default:
                 throw new InvalidArgumentException(sprintf('connection `%s` is not supported', $connection));
@@ -91,14 +98,14 @@ class Idempotent
     /**
      * Set data into shared memory
      *
-     * @param StorageInterface $storage
+     * @param Storage $storage
      * @param string $entityName
      * @param array $entityConfig
      * @param string $hash
      * @return array
      * @throws Exception
      */
-    public function set(StorageInterface $storage, string $entityName, array $entityConfig, string $hash): array
+    public function set(Storage $storage, string $entityName, array $entityConfig, string $hash): array
     {
         return $storage->set($entityName, $entityConfig, $hash);
     }
@@ -106,13 +113,14 @@ class Idempotent
     /**
      * update data of shared storage
      *
-     * @param StorageInterface $storage
+     * @param Storage $storage
      * @param $response
      * @param string $entityName
      * @param string $hash
      * @return void
+     * @throws Exception
      */
-    public function update(StorageInterface $storage, $response, string $entityName, string $hash): void
+    public function update(Storage $storage, $response, string $entityName, string $hash): void
     {
         $storage->update($response, $entityName, $hash);
     }

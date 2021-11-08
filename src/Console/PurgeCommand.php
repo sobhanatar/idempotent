@@ -94,7 +94,7 @@ class PurgeCommand extends Command
      */
     public function getConnection(): ?string
     {
-        return config('idempotent.storage.database.connection');
+        return 'mysql';
     }
 
     /**
@@ -104,6 +104,6 @@ class PurgeCommand extends Command
      */
     public function getTable(): string
     {
-        return config('idempotent.storage.database.table');
+        return config('idempotent.table');
     }
 }

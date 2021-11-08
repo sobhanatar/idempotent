@@ -6,7 +6,7 @@ use Redis;
 use malkusch\lock\mutex\PHPRedisMutex;
 use Symfony\Component\HttpFoundation\Response as SymphonyResponse;
 
-class RedisStorage implements StorageInterface
+class RedisStorage implements Storage
 {
     /**
      * @var Redis $redis

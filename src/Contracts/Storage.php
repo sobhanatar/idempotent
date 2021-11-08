@@ -9,7 +9,7 @@ use malkusch\lock\exception\LockAcquireException;
 use malkusch\lock\exception\LockReleaseException;
 use malkusch\lock\exception\ExecutionOutsideLockException;
 
-interface StorageInterface
+interface Storage
 {
     /**
      * Set hash to storage and return if hash exists
