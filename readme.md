@@ -70,7 +70,6 @@ If you discover any security-related issues, please email atarsobhan@gmail.com i
 ## Credits
 
 - [Sobhan Atar][link-author]
-- [All Contributors][link-contributors]
 
 ## License
 
