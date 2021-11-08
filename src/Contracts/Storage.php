@@ -12,7 +12,7 @@ use malkusch\lock\exception\ExecutionOutsideLockException;
 interface Storage
 {
     /**
-     * Set hash to storage and return if hash exists
+     * Check if hash existence, and set non-existent hash in storage
      *
      * @param string $entity
      * @param array $config
@@ -26,7 +26,7 @@ interface Storage
      * has been executed outside of the lock.
      * @throws Exception The execution callback threw an exception.
      */
-    public function set(string $entity, array $config, string $hash): array;
+    public function verify(string $entity, array $config, string $hash): array;
 
     /**
      * Update hash in storage

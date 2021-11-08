@@ -29,16 +29,16 @@ class MysqlStorage implements Storage
     /**
      * @inheritDoc
      */
-    public function set(string $entity, array $config, string $hash): array
+    public function verify(string $entity, array $config, string $hash): array
     {
         $lock = new MySQLMutex($this->pdo, $entity, $config['timeout']);
         return $lock->synchronized(function () use ($entity, $config, $hash): array {
-            [$exist, $result] = $this->check($entity, $hash);
+            [$exist, $result] = $this->get($entity, $hash);
             if ($exist) {
                 return [true, $result];
             }
 
-            return $this->insert($entity, $hash, (int)$config['ttl']);
+            return $this->set($entity, $hash, (int)$config['ttl']);
         });
     }
 
@@ -76,7 +76,7 @@ class MysqlStorage implements Storage
      * @param string $hash
      * @return array
      */
-    private function check(string $entity, string $hash): array
+    private function get(string $entity, string $hash): array
     {
         $sql = sprintf(
             "SELECT `id`, `status`, `response` FROM %s WHERE `entity` = '%s' AND `expired_ut` > %d AND `hash` = '%s' ORDER BY `id` DESC LIMIT 1",
@@ -102,7 +102,7 @@ class MysqlStorage implements Storage
      * @param int $ttl
      * @return array
      */
-    private function insert(string $entity, string $hash, int $ttl): array
+    private function set(string $entity, string $hash, int $ttl): array
     {
         $sql = sprintf(
             "%s %s",

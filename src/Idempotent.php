@@ -26,7 +26,7 @@ class Idempotent
      * @throws InvalidArgumentException
      * @throws Exception
      */
-    public function getEntity(Request $request): array
+    public function resolveEntity(Request $request): array
     {
         $route = $request->route();
         if (!$route instanceof Route) {
@@ -57,7 +57,7 @@ class Idempotent
      *
      * @throws InvalidArgumentException
      */
-    public function getStorageService(string $connection): Storage
+    public function resolveStorage(string $connection): Storage
     {
         switch ($connection) {
             case 'mysql':
@@ -85,7 +85,7 @@ class Idempotent
      * @return string
      * @throws InvalidArgumentException
      */
-    public function createHash(Request $request, string $entityName, array $fields): string
+    public function getIdempotentKey(Request $request, string $entityName, array $fields): string
     {
         $data[] = $entityName;
         foreach ($fields as $field) {
@@ -105,9 +105,9 @@ class Idempotent
      * @return array
      * @throws Exception
      */
-    public function set(Storage $storage, string $entityName, array $entityConfig, string $hash): array
+    public function verify(Storage $storage, string $entityName, array $entityConfig, string $hash): array
     {
-        return $storage->set($entityName, $entityConfig, $hash);
+        return $storage->verify($entityName, $entityConfig, $hash);
     }
 
     /**

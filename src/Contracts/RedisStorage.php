@@ -21,7 +21,7 @@ class RedisStorage implements Storage
     /**
      * @inheritDoc
      */
-    public function set(string $entity, array $config, string $hash): array
+    public function verify(string $entity, array $config, string $hash): array
     {
         $mutex = new PHPRedisMutex([$this->redis], 'idempotent');
         return $mutex->synchronized(function () use ($entity, $hash, $config) {
