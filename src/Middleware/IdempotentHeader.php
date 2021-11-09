@@ -7,7 +7,7 @@ use Exception;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
 
-class IdempotentHash
+class IdempotentHeader
 {
     /**
      * @var Idempotent $idempotent

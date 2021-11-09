@@ -22,9 +22,9 @@ $ php artisan vendor:publish --tag=idempotent-config --tag=idempotent-language
 ```
 
 The next step is deciding on how you want to control the idempotency of your service. In this package, two kinds of
-middlewares can help you achieve the idempotency.
+middlewares can help you achieve the idempotency, `IdempotentHeader`, and `IdempotentVerify`.
 
-### IdempotentHash
+### IdempotentHeader
 
 This middleware gets the `entity` from the configuration file, and it makes an idempotent identifier based on the
 entity's `fields`. It's important to know that storing, checking, or any other use of the key will remain for the
@@ -48,6 +48,9 @@ This middleware handles all the required steps for making an endpoint idempotent
 
 Note: Make sure to use any of two middlewares to only those routes that you want to be idempotent, and not all the
 routes.
+
+## Pruning Hashes
+
 
 ## Changelog
 
