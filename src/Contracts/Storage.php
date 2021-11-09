@@ -3,14 +3,14 @@
 namespace Sobhanatar\Idempotent\Contracts;
 
 use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
-use malkusch\lock\exception\LockAcquireException;
-use malkusch\lock\exception\LockReleaseException;
-use malkusch\lock\exception\ExecutionOutsideLockException;
+use Illuminate\Http\{Response, JsonResponse};
+use malkusch\lock\exception\{LockAcquireException, LockReleaseException, ExecutionOutsideLockException};
 
 interface Storage
 {
+    public const MYSQL = 'mysql';
+    public const REDIS = 'redis';
+
     /**
      * Check if hash existence, and set non-existent hash in storage
      *

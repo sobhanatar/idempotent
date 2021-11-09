@@ -3,10 +3,11 @@
 namespace Sobhanatar\Idempotent\Console;
 
 use Exception;
+use InvalidArgumentException;
 use Illuminate\Console\Command;
 use Illuminate\Database\Schema\Builder;
-use Illuminate\Support\Facades\Schema;
-use InvalidArgumentException;
+use Sobhanatar\Idempotent\Contracts\Storage;
+use Illuminate\Support\Facades\{DB, Schema};
 use Sobhanatar\Idempotent\Exceptions\TableNotFoundException;
 
 class PurgeCommand extends Command
@@ -35,14 +36,14 @@ class PurgeCommand extends Command
      * @var string
      */
     protected $signature = 'idempotent:purge
-            {--entity= : The entity to remove its hashes from the entities in config file.}';
+            {--entity= : The entity to remove its keys/hashes from the entities in config file.}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Purge the hashes based on the ttl of entity from database';
+    protected $description = 'Purge the keys/hashes based on the ttl of an entity from database';
 
     /**
      * Execute the console command.
@@ -54,11 +55,13 @@ class PurgeCommand extends Command
         $entity = $this->option('entity');
 
         try {
-            $this->validateInput($entity);
-            $this->info('implement this');
-            // todo:
-            //  remove entity expired hashes based on ttl from database
-
+            $this->info(sprintf('Purging %s idempotent keys/hashes', $entity));
+            $this->validateEntity($entity);
+            DB::table($this->getTable())
+                ->where('entity', '=', $entity)
+                ->where('expired_ut', '<', now()->unix())
+                ->delete();
+            $this->info(sprintf('`%s` expired idempotent keys/hashes has removed.', $entity));
 
         } catch (Exception $e) {
             $this->error($e->getMessage());
@@ -66,23 +69,31 @@ class PurgeCommand extends Command
     }
 
     /**
+     * Validate input and return the config if available
+     *
      * @param $entity
      * @return void
-     * @throws Exception
+     * @throws TableNotFoundException
      */
-    private function validateInput($entity): void
+    private function validateEntity($entity): void
     {
         $entities = collect(config('idempotent.entities'))->keys()->toArray();
+        if (!$entity || !in_array($entity, $entities, true)) {
+            throw new InvalidArgumentException(
+                sprintf("The entity is missing or not exists. Use one of these entities: [%s]",
+                    implode(', ', $entities)
+                )
+            );
+        }
+
+        $config = config('idempotent.entities.' . $entity);
+        if ($config['storage'] !== Storage::MYSQL) {
+            throw new InvalidArgumentException("The entity storage is not database");
+        }
 
         if (!$this->schema->hasTable($this->getTable())) {
             throw new TableNotFoundException(
-                sprintf("The table is missing. Table name is `%s`", $this->getTable())
-            );
-        }
-
-        if (!$entity || !in_array($entity, $entities, true)) {
-            throw new InvalidArgumentException(
-                sprintf("The entity is missing or not correct. Use one of these: [%s]", implode(', ', $entities))
+                sprintf("The idempotent table is missing. Make sure `%s` exists and reachable.", $this->getTable())
             );
         }
     }
@@ -90,11 +101,11 @@ class PurgeCommand extends Command
     /**
      * Get the migration connection name.
      *
-     * @return string|null
+     * @return string
      */
-    public function getConnection(): ?string
+    private function getConnection(): string
     {
-        return 'mysql';
+        return Storage::MYSQL;
     }
 
     /**
@@ -102,7 +113,7 @@ class PurgeCommand extends Command
      *
      * @return string|null
      */
-    public function getTable(): string
+    private function getTable(): string
     {
         return config('idempotent.table');
     }

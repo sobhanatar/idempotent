@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Builder;
-use Illuminate\Database\Schema\Blueprint;
+use Sobhanatar\Idempotent\Contracts\Storage;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\{Builder, Blueprint};
 
 class CreateServiceIdempotentTable extends Migration
 {
@@ -68,7 +67,7 @@ class CreateServiceIdempotentTable extends Migration
      */
     public function getConnection(): ?string
     {
-        return 'mysql';
+        return Storage::MYSQL;
     }
 
     /**

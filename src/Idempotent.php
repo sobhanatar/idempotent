@@ -60,9 +60,9 @@ class Idempotent
     public function resolveStorage(string $connection): Storage
     {
         switch ($connection) {
-            case 'mysql':
-                return new MysqlStorage(DB::connection('mysql')->getPdo());
-            case 'redis':
+            case Storage::MYSQL:
+                return new MysqlStorage(DB::connection(Storage::MYSQL)->getPdo());
+            case Storage::REDIS:
                 $redis = new Redis();
                 $redis->connect(
                     config('idempotent.redis.host'),

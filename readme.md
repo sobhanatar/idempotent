@@ -1,40 +1,50 @@
-# Idempotent
+# Introduction
 
-This package is created as a sample for creating [idempotent services](https://restfulapi.net/idempotent-rest-apis/),
-and in its current state, maybe not extendable to different requirements. However, this package will be updated from
-time to time, giving complete control over various aspects of it.
+Idempotent package provides [idempotency](https://restfulapi.net/idempotent-rest-apis/) for your laravel package.
+However, in its current state, maybe not extendable to different requirements and can be used as a sample of doing so.
+Moreover, this package will be updated from time to time, in attempt to giving more control over various aspects of it.
 
 ## Installation
 
-Via Composer
+To get started, install Idempotent via the Composer package manager:
 
 ```bash
 $ composer require sobhanatar/idempotent
 ```
 
-## Usage
+Idempotent service provider registers its own config, language, and database migration file, so you need to export them
 
-To use this package, you need to publish its configuration and language files and set the options as per the need of
-your service. The configuration file is self-documented so that you can find your way through.
+```bash
+$ php artisan vendor:publish --provider="Sobhanatar\Idempotent\IdempotentServiceProvider"
+```
+
+**Note:** If you don't want to use mysql database as shared memory, you can publish config, and language file using
+following command:
 
 ```bash
 $ php artisan vendor:publish --tag=idempotent-config --tag=idempotent-language
 ```
 
-The next step is deciding on how you want to control the idempotency of your service. In this package, two kinds of
-middlewares can help you achieve the idempotency, `IdempotentHeader`, and `IdempotentVerify`.
+## Deploying Idempotent
+
+To use idempotent package, you need set the options as per the need of your service in configuration and language files.
+The configuration file is self-documented so that you can find your way through.
+
+The next step is deciding on how you want to control the idempotency of your service. Idempotent package provides two
+middlewares that can help you achieve the idempotency; `IdempotentHeader`, and `IdempotentVerify`. Don't forget to
+register the middleware in `Kernel.php`.
 
 ### IdempotentHeader
 
-This middleware gets the `entity` from the configuration file, and it makes an idempotent identifier based on the
-entity's `fields`. It's important to know that storing, checking, or any other use of the key will remain for the
-developer to handle.
+`IdempotentHeader` makes an idempotent key/hash based on the entity's `fields` and put it in the header of request. The
+assumption in this middleware is that the developer will remain responsible for the logic of using the idempotent
+key/hash.
 
 ### IdempotentVerify
 
-This middleware handles all the required steps for making an endpoint idempotent. The steps are as follows:
+`IdempotentVerify` handles all the required steps for making an endpoint idempotent. The steps are as follows:
 
-1. Get the entity configuration
+1. Get the `entity`'s configuration
 2. Create an idempotent key/hash based on the entity's `fields`.
 3. Check if the idempotent key/hash exists in the selected `storage`.
 4. If it doesn't exist:
@@ -49,8 +59,32 @@ This middleware handles all the required steps for making an endpoint idempotent
 Note: Make sure to use any of two middlewares to only those routes that you want to be idempotent, and not all the
 routes.
 
-## Pruning Hashes
+## Purging Idempotent Keys/Hashes
 
+If you use mysql as the storage, it's important to purge the expired keys/hashes. Idempotent's included
+`idempotent:purge` Artisan command can do this for you.
+
+```bash
+# Purge expired keys/hashes
+$ php artisan idempotent:purge --entity=my-idempotent-endpoint
+```
+
+You may also configure a scheduled job in your application's `App\Console\Kernel` class to automatically prune your
+tokens on a schedule:
+
+```php
+/**
+ * Define the application's command schedule.
+ *
+ * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+ * @return void
+ */
+protected function schedule(Schedule $schedule)
+{
+    $schedule->command('idempotent:purge')->hourly();
+}
+
+```
 
 ## Changelog
 
