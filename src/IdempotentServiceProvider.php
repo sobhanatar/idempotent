@@ -7,6 +7,8 @@ use Sobhanatar\Idempotent\Commands\PurgeCommand;
 
 class IdempotentServiceProvider extends ServiceProvider
 {
+    private const PACKAGE_NAME = 'idempotent';
+
     /**
      * Register any application services.
      *
@@ -14,8 +16,11 @@ class IdempotentServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Make sure you have this line here as testbench needs this to load the config
+        $this->mergeConfigFrom(__DIR__ . '/../config/idempotent.php', self::PACKAGE_NAME);
+
         // Register the service the package provides.
-        $this->app->singleton('idempotent', function ($app) {
+        $this->app->singleton(self::PACKAGE_NAME, function ($app) {
             return new Idempotent;
         });
     }
@@ -53,6 +58,6 @@ class IdempotentServiceProvider extends ServiceProvider
      */
     public function provides(): array
     {
-        return ['idempotent'];
+        return [self::PACKAGE_NAME];
     }
 }

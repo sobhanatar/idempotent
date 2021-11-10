@@ -76,7 +76,7 @@ class MysqlStorage implements Storage
      * @param string $hash
      * @return array
      */
-    private function get(string $entity, string $hash): array
+    public function get(string $entity, string $hash): array
     {
         $sql = sprintf(
             "SELECT `id`, `status`, `response` FROM %s WHERE `entity` = '%s' AND `expired_ut` > %d AND `hash` = '%s' ORDER BY `id` DESC LIMIT 1",
@@ -102,12 +102,12 @@ class MysqlStorage implements Storage
      * @param int $ttl
      * @return array
      */
-    private function set(string $entity, string $hash, int $ttl): array
+    public function set(string $entity, string $hash, int $ttl): array
     {
         $sql = sprintf(
             "%s %s",
-            "INSERT INTO {$this->table} (entity, hash, status, expired_ut, created_ut, created_at)",
-            "VALUES (:entity, :hash, :status, :expired_ut, :created_ut, :created_at)");
+            "INSERT INTO {$this->table} (entity, hash, status, expired_ut, created_ut, created_at, updated_ut, updated_at)",
+            "VALUES (:entity, :hash, :status, :expired_ut, :created_ut, :created_at, :updated_ut, :updated_at)");
         $now = now();
         $this->pdo->prepare($sql)->execute([
             'entity' => $entity,
@@ -116,6 +116,8 @@ class MysqlStorage implements Storage
             'expired_ut' => $now->unix() + $ttl,
             'created_ut' => $now->unix(),
             'created_at' => $now->format('Y-m-d H:i:s'),
+            'updated_ut' => $now->unix(),
+            'updated_at' => $now->format('Y-m-d H:i:s'),
         ]);
 
         return [false, null];
