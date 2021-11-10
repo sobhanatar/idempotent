@@ -1,8 +1,9 @@
 {
     "name": "sobhanatar/idempotent",
     "description": "Idempotent Package for Laravel",
-    "type": "project",
+    "type": "library",
     "license": "MIT",
+    "homepage": "https://github.com/sobhanatar/idempotent",
     "authors": [
         {
             "name": "Sobhan Atar",
@@ -10,7 +11,6 @@
             "homepage": "https://github.com/sobhanatar"
         }
     ],
-    "homepage": "https://github.com/sobhanatar/idempotent",
     "keywords": [
         "Idempotent",
         "Idempotency",
@@ -53,5 +53,10 @@
                 "Idempotent": "Sobhanatar\\Idempotent\\Facades\\Idempotent"
             }
         }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
     }
 }
