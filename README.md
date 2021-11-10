@@ -44,7 +44,7 @@ key/hash.
 
 `IdempotentVerify` handles all the required steps for making an endpoint idempotent. The steps are as follows:
 
-1. Get the `entity`'s configuration
+1. Get the `entity` configuration
 2. Create an idempotent key/hash based on the entity's `fields`.
 3. Check if the idempotent key/hash exists in the selected `storage`.
 4. If it doesn't exist:
