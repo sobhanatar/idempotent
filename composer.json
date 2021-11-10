@@ -1,18 +1,21 @@
 {
     "name": "sobhanatar/idempotent",
-    "description": ":package_description",
+    "description": "Idempotent Package for Laravel",
+    "type": "project",
     "license": "MIT",
     "authors": [
         {
             "name": "Sobhan Atar",
-            "email": "atarsobhan@gmail.com",
+            "email": "sobhanattar@gmail.com",
             "homepage": "https://github.com/sobhanatar"
         }
     ],
     "homepage": "https://github.com/sobhanatar/idempotent",
     "keywords": [
-        "Laravel",
-        "Idempotent"
+        "Idempotent",
+        "Idempotency",
+        "Idempotent-request",
+        "Laravel"
     ],
     "require": {
         "php": "~7.4|~8",
