@@ -1,12 +1,18 @@
-# Introduction
+<p align="center">
+<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/dt/sobhanatar/idempotent" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/v/sobhanatar/idempotent" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/l/sobhanatar/idempotent" alt="License"></a>
+</p>
+
+## Introduction
 
 Idempotent package provides [idempotency](https://restfulapi.net/idempotent-rest-apis/) for your laravel package.
 However, in its current state, maybe not extendable to different requirements and can be used as a sample of doing so.
-Moreover, this package will be updated from time to time, in attempt to giving more control over various aspects of it.
+Moreover, this package will be updated, in attempt to giving more control over various aspects of it.
 
 ## Installation
 
-To get started, install Idempotent via the Composer package manager:
+To get started, install the Idempotent package via the Composer package manager:
 
 ```bash
 $ composer require sobhanatar/idempotent
@@ -61,7 +67,7 @@ routes.
 
 ## Purging Idempotent Keys/Hashes
 
-If you use mysql as the storage, it's important to purge the expired keys/hashes. Idempotent's included
+If you use mysql as the storage, it's important to purge the expired keys/hashes. Idempotent included
 `idempotent:purge` Artisan command can do this for you.
 
 ```bash
@@ -86,10 +92,6 @@ protected function schedule(Schedule $schedule)
 
 ```
 
-## Changelog
-
-Please see the [changelog](changelog.MD) for more information on recent changes.
-
 ## Testing
 
 ```bash
@@ -98,7 +100,7 @@ $ composer test
 
 ## Contributing
 
-Please see [contributing.md](contributing.md) for details and a todolist.
+Thank you for considering contributing to Idempotent! You can read the contribution guide [here](CONTRIBUTING.md).
 
 ## Security
 
@@ -110,7 +112,7 @@ If you discover any security-related issues, please email atarsobhan@gmail.com i
 
 ## License
 
-MIT. Please see the [license file](license.MD) for more information.
+Idempotent is open-sourced software licensed under the [MIT license](LICENSE.md).
 
 [ico-version]: https://img.shields.io/packagist/v/sobhanatar/idempotent.svg?style=flat-square
 
@@ -129,5 +131,3 @@ MIT. Please see the [license file](license.MD) for more information.
 [link-styleci]: https://styleci.io/repos/12345678
 
 [link-author]: https://github.com/sobhanatar
-
-[link-contributors]: ../../contributors
