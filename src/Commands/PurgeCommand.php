@@ -1,6 +1,6 @@
 <?php
 
-namespace Sobhanatar\Idempotent\Console;
+namespace Sobhanatar\Idempotent\Commands;
 
 use Exception;
 use InvalidArgumentException;

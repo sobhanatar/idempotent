@@ -3,7 +3,7 @@
 namespace Sobhanatar\Idempotent;
 
 use Illuminate\Support\ServiceProvider;
-use Sobhanatar\Idempotent\Console\PurgeCommand;
+use Sobhanatar\Idempotent\Commands\PurgeCommand;
 
 class IdempotentServiceProvider extends ServiceProvider
 {
