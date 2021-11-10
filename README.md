@@ -98,7 +98,7 @@ Thank you for considering contributing to Idempotent! You can read the contribut
 
 ## Security
 
-If you discover any security-related issues, please email atarsobhan@gmail.com instead of using the issue tracker.
+If you discover any security-related issues, please email sobhanattar@gmail.com instead of using the issue tracker.
 
 ## Credits
 
