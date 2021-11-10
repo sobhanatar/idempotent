@@ -1,9 +1,3 @@
-<p align="center">
-<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/dt/sobhanatar/idempotent" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/v/sobhanatar/idempotent" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/sobhanatar/idempotent"><img src="https://img.shields.io/packagist/l/sobhanatar/idempotent" alt="License"></a>
-</p>
-
 ## Introduction
 
 Idempotent package provides [idempotency](https://restfulapi.net/idempotent-rest-apis/) for your laravel package.
