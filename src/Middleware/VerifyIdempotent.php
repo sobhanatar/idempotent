@@ -7,7 +7,7 @@ use Exception;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
 
-class IdempotentVerify
+class VerifyIdempotent
 {
     /**
      * @var Idempotent $idempotent
