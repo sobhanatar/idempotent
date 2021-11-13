@@ -43,6 +43,10 @@ class Idempotent
             throw new MethodNotAllowedException([SymphonyRequest::METHOD_POST], 'Route method is not POST');
         }
 
+        if(!isset($config['fields'])){
+            throw new InvalidArgumentException('entity\'s field is empty');
+        }
+
         foreach ($config['fields'] as $field) {
             if (!$request->input($field)) {
                 throw new InvalidArgumentException(sprintf('%s is in fields but not on request inputs', $field));
@@ -79,17 +83,22 @@ class Idempotent
     }
 
     /**
+     * Create idempotent key/hash based on input options
+     *
      * @param Request $request
-     * @param string $entityName
-     * @param array $fields
+     * @param string $entity
+     * @param array $config
      * @return string
-     * @throws InvalidArgumentException
      */
-    public function getIdempotentKey(Request $request, string $entityName, array $fields): string
+    public function getIdempotentKey(Request $request, string $entity, array $config): string
     {
-        $data[] = $entityName;
-        foreach ($fields as $field) {
+        $data[] = $entity;
+        foreach ($config['fields'] as $field) {
             $data[] = $request->input($field);
+        }
+
+        foreach ($config['headers'] ?? [] as $header) {
+            $data[] = $request->header($header);
         }
 
         return hash(config('idempotent.driver', 'sha256'), implode(self::SEPARATOR, $data));

@@ -32,19 +32,19 @@ class IdempotentVerify
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            [$entityName, $entityConfig] = $this->idempotent->resolveEntity($request);
-            $storageService = $this->idempotent->resolveStorage($entityConfig['connection']);
-            $hash = $this->idempotent->getIdempotentKey($request, $entityName, $entityConfig['fields']);
+            [$entity, $config] = $this->idempotent->resolveEntity($request);
+            $storageService = $this->idempotent->resolveStorage($config['connection']);
+            $hash = $this->idempotent->getIdempotentKey($request, $entity, $config);
 
-            [$exists, $result] = $this->idempotent->verify($storageService, $entityName, $entityConfig, $hash);
+            [$exists, $result] = $this->idempotent->verify($storageService, $entity, $config, $hash);
             if ($exists) {
-                $response = $this->idempotent->prepareResponse($entityName, $result['response']);
+                $response = $this->idempotent->prepareResponse($entity, $result['response']);
                 return response($response);
             }
 
             /**@var Response $response */
             $response = $next($request);
-            $this->idempotent->update($storageService, $response, $entityName, $hash);
+            $this->idempotent->update($storageService, $response, $entity, $hash);
             return response($response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {

@@ -91,6 +91,10 @@ return [
     | together make a request (idempotent-key) unique - in regards to the `ttl` of
     | an entity.
     |
+    | `headers` list all header names that the application may use to make the
+    | idempotent key/hash unique. It's important to mention that the header's name
+    | should exist, as the package ignores non-existence headers.
+    |
     */
 
     'entities' => [
@@ -99,6 +103,7 @@ return [
             'ttl' => 100,
             'timeout' => 5,
             'fields' => ['first_name', 'last_name', 'email'],
+            'headers' => ['ip'],
         ],
         'news-post' => [
             'storage' => 'redis',

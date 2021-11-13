@@ -32,8 +32,8 @@ class IdempotentHeader
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            [$entityName, $entityConfig] = $this->idempotent->resolveEntity($request);
-            $hash = $this->idempotent->getIdempotentKey($request, $entityName, $entityConfig['fields']);
+            [$entity, $config] = $this->idempotent->resolveEntity($request);
+            $hash = $this->idempotent->getIdempotentKey($request, $entity, $config);
             $request->headers->set(config('idempotent.header'), $hash);
 
             return $next($request);
