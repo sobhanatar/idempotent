@@ -54,7 +54,8 @@ key/hash.
        cache.
 5. If it exists:
     1. If the `status` is `done` or `fail`, then the `response` will be read from storage and replied to the user.
-    2. If the `status` is `progress`, the message in `idempotent` language file for that entity will be returned.
+    2. If the `status` is `progress`, the message in `idempotent` language file for that `entity` will be return as
+       response to the user.
 
 Note: Make sure to use any of two middlewares to only those routes that you want to be idempotent, and not all the
 routes.
