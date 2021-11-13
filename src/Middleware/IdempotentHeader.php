@@ -39,8 +39,8 @@ class IdempotentHeader
                 'headers' => $request->headers->all(),
                 'servers' => $request->server->all()
             ];
-            $key = $this->idempotent->createIdempotentKey($requestBag, $entity, $config);
-            $hash = $this->idempotent->getIdempotentHash($key);
+            $key = $this->idempotent->createSignature($requestBag, $entity, $config);
+            $hash = $this->idempotent->createHash($key);
             $request->headers->set(config('idempotent.header'), $hash);
 
             return $next($request);

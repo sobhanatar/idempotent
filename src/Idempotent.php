@@ -95,14 +95,14 @@ class Idempotent
     }
 
     /**
-     * Create Idempotent key based on fields and headers
+     * Create Idempotent signature based on fields and headers
      *
      * @param array $requestBag
      * @param string $entity
      * @param array $config
      * @return string
      */
-    public function createIdempotentKey(array $requestBag, string $entity, array $config): string
+    public function createSignature(array $requestBag, string $entity, array $config): string
     {
         $data[] = $entity;
         foreach ($config['fields'] as $field) {
@@ -149,12 +149,12 @@ class Idempotent
     }
 
     /**
-     * Create idempotent key/hash
+     * Create hash from the request signature
      *
      * @param string $key
      * @return string
      */
-    public function getIdempotentHash(string $key): string
+    public function createHash(string $key): string
     {
         return hash(config('idempotent.driver', 'sha256'), $key);
     }
