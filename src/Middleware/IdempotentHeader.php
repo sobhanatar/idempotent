@@ -33,7 +33,9 @@ class IdempotentHeader
     {
         try {
             [$entity, $config] = $this->idempotent->resolveEntity($request);
-            $hash = $this->idempotent->getIdempotentKey($request, $entity, $config);
+            $this->idempotent->validateEntity($request, $entity, $config);
+            $key = $this->idempotent->getIdempotentKey($request, $entity, $config);
+            $hash = $this->idempotent->getIdempotentHash($key);
             $request->headers->set(config('idempotent.header'), $hash);
 
             return $next($request);

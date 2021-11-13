@@ -35,6 +35,20 @@ class Idempotent
 
         $entity = str_replace(self::ROUTE_SEPARATOR, self::SEPARATOR, $route->getName());
         $config = config(sprintf('idempotent.entities.%s', $entity));
+
+        return [$entity, $config];
+    }
+
+    /**
+     * Validate entity's requirement
+     *
+     * @param Request $request
+     * @param string $entity
+     * @param array $config
+     * @return void
+     */
+    public function validateEntity(Request $request, string $entity, array $config): void
+    {
         if (!isset($config)) {
             throw new InvalidArgumentException(sprintf('Entity `%s` does not exists', $entity));
         }
@@ -43,7 +57,7 @@ class Idempotent
             throw new MethodNotAllowedException([SymphonyRequest::METHOD_POST], 'Route method is not POST');
         }
 
-        if(!isset($config['fields'])){
+        if (!isset($config['fields'])) {
             throw new InvalidArgumentException('entity\'s field is empty');
         }
 
@@ -52,8 +66,6 @@ class Idempotent
                 throw new InvalidArgumentException(sprintf('%s is in fields but not on request inputs', $field));
             }
         }
-
-        return [$entity, $config];
     }
 
     /**
@@ -82,15 +94,7 @@ class Idempotent
         }
     }
 
-    /**
-     * Create idempotent key/hash based on input options
-     *
-     * @param Request $request
-     * @param string $entity
-     * @param array $config
-     * @return string
-     */
-    public function getIdempotentKey(Request $request, string $entity, array $config): string
+    public function getIdempotentKey(Request $request, string $entity, array $config):string
     {
         $data[] = $entity;
         foreach ($config['fields'] as $field) {
@@ -101,7 +105,18 @@ class Idempotent
             $data[] = $request->header($header);
         }
 
-        return hash(config('idempotent.driver', 'sha256'), implode(self::SEPARATOR, $data));
+        return implode(self::SEPARATOR, $data);
+    }
+
+    /**
+     * Create idempotent key/hash
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getIdempotentHash(string $key): string
+    {
+        return hash(config('idempotent.driver', 'sha256'), $key);
     }
 
     /**

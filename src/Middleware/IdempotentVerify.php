@@ -33,8 +33,10 @@ class IdempotentVerify
     {
         try {
             [$entity, $config] = $this->idempotent->resolveEntity($request);
+            $this->idempotent->validateEntity($request, $entity, $config);
             $storageService = $this->idempotent->resolveStorage($config['connection']);
-            $hash = $this->idempotent->getIdempotentKey($request, $entity, $config);
+            $key = $this->idempotent->getIdempotentKey($request, $entity, $config);
+            $hash = $this->idempotent->getIdempotentHash($key);
 
             [$exists, $result] = $this->idempotent->verify($storageService, $entity, $config, $hash);
             if ($exists) {
