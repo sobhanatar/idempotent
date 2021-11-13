@@ -108,8 +108,8 @@ class Idempotent
         $baseSignature = array_merge(
             [$entity],
             $this->getFieldsFromRequest($requestBag['fields'], $config['fields']),
-            $this->getHeadersFromRequest($requestBag['headers'], $config['headers']),
-            $this->getServerFromRequest($requestBag['servers'], $config['servers']),
+            $this->getHeadersFromRequest($requestBag['headers'], $config['headers'] ?? []),
+            $this->getServerFromRequest($requestBag['servers'], $config['servers'] ?? []),
         );
 
         return implode(self::SEPARATOR, $baseSignature);
@@ -196,7 +196,7 @@ class Idempotent
      */
     protected function getHeadersFromRequest(array $requestHeaders, array $configHeaders): array
     {
-        if (!isset($configHeaders)) {
+        if (!count($configHeaders)) {
             return [];
         }
 
@@ -230,7 +230,7 @@ class Idempotent
      */
     protected function getServerFromRequest(array $requestServers, array $configServers): array
     {
-        if (!isset($configServers)) {
+        if (!count($configServers)) {
             return [];
         }
 
