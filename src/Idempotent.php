@@ -73,7 +73,7 @@ class Idempotent
      *
      * @throws InvalidArgumentException
      */
-    public function resolveStorage(string $connection): Storage
+    public function resolveStorageService(string $connection): Storage
     {
         switch ($connection) {
             case Storage::MYSQL:

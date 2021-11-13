@@ -34,19 +34,20 @@ class IdempotentVerify
         try {
             [$entity, $config] = $this->idempotent->resolveEntity($request);
             $this->idempotent->validateEntity($request, $entity, $config);
-            $storageService = $this->idempotent->resolveStorage($config['connection']);
+            $service = $this->idempotent->resolveStorageService($config['connection']);
             $key = $this->idempotent->getIdempotentKey($request, $entity, $config);
             $hash = $this->idempotent->getIdempotentHash($key);
 
-            [$exists, $result] = $this->idempotent->verify($storageService, $entity, $config, $hash);
+            [$exists, $result] = $this->idempotent->verify($service, $entity, $config, $hash);
             if ($exists) {
                 $response = $this->idempotent->prepareResponse($entity, $result['response']);
                 return response($response);
             }
 
+            //Do after getting response
             /**@var Response $response */
             $response = $next($request);
-            $this->idempotent->update($storageService, $response, $entity, $hash);
+            $this->idempotent->update($service, $response, $entity, $hash);
             return response($response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
