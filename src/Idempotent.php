@@ -15,8 +15,9 @@ use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage, MysqlStorage};
 
 class Idempotent
 {
-    private const SEPARATOR = '-';
-    private const ROUTE_SEPARATOR = '.';
+    protected const SEPARATOR = '_';
+
+    protected const ROUTE_SEPARATOR = '.';
 
     /**
      * Get the entity's name from the route's name and then acquire its config
@@ -102,7 +103,7 @@ class Idempotent
      * @param array $config
      * @return string
      */
-    public function createSignature(array $requestBag, string $entity, array $config): string
+    public function makeSignature(array $requestBag, string $entity, array $config): string
     {
         $data[] = $entity;
         foreach ($config['fields'] as $field) {
@@ -154,7 +155,7 @@ class Idempotent
      * @param string $key
      * @return string
      */
-    public function createHash(string $key): string
+    public function hash(string $key): string
     {
         return hash(config('idempotent.driver', 'sha256'), $key);
     }
