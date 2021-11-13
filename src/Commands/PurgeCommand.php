@@ -5,31 +5,12 @@ namespace Sobhanatar\Idempotent\Commands;
 use Exception;
 use InvalidArgumentException;
 use Illuminate\Console\Command;
-use Illuminate\Database\Schema\Builder;
 use Sobhanatar\Idempotent\Contracts\Storage;
 use Illuminate\Support\Facades\{DB, Schema};
 use Sobhanatar\Idempotent\Exceptions\TableNotFoundException;
 
 class PurgeCommand extends Command
 {
-    /**
-     * The database schema.
-     *
-     * @var Builder
-     */
-    protected $schema;
-
-    /**
-     * Create a new migration instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->schema = Schema::connection($this->getConnection());
-    }
-
     /**
      * The name and signature of the console command.
      *
@@ -56,8 +37,9 @@ class PurgeCommand extends Command
 
         try {
             $this->info(sprintf('Purging %s idempotent keys/hashes', $entity));
-            $this->validateEntity($entity);
-            DB::table($this->getTable())
+            $config = $this->validateEntity($entity);
+            DB::connection($config['storage'])
+                ->table($this->getTable())
                 ->where('entity', '=', $entity)
                 ->where('expired_ut', '<', now()->unix())
                 ->delete();
@@ -72,10 +54,10 @@ class PurgeCommand extends Command
      * Validate input and return the config if available
      *
      * @param $entity
-     * @return void
+     * @return array
      * @throws TableNotFoundException
      */
-    private function validateEntity($entity): void
+    private function validateEntity($entity): array
     {
         $entities = collect(config('idempotent.entities'))->keys()->toArray();
         if (!$entity || !in_array($entity, $entities, true)) {
@@ -91,21 +73,13 @@ class PurgeCommand extends Command
             throw new InvalidArgumentException("The entity storage is not database");
         }
 
-        if (!$this->schema->hasTable($this->getTable())) {
+        if (!Schema::connection($config['storage'])->hasTable($this->getTable())) {
             throw new TableNotFoundException(
                 sprintf("The idempotent table is missing. Make sure `%s` exists and reachable.", $this->getTable())
             );
         }
-    }
 
-    /**
-     * Get the migration connection name.
-     *
-     * @return string
-     */
-    private function getConnection(): string
-    {
-        return Storage::MYSQL;
+        return $config;
     }
 
     /**
