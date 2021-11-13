@@ -94,15 +94,55 @@ class Idempotent
         }
     }
 
-    public function getIdempotentKey(Request $request, string $entity, array $config):string
+    /**
+     * Create Idempotent key based on fields and headers
+     *
+     * @param array $requestBag
+     * @param string $entity
+     * @param array $config
+     * @return string
+     */
+    public function createIdempotentKey(array $requestBag, string $entity, array $config): string
     {
         $data[] = $entity;
         foreach ($config['fields'] as $field) {
-            $data[] = $request->input($field);
+            $data[] = $requestBag['fields'][$field];
         }
 
+        //Process header names
+        $requestHeaders = $requestBag['headers'];
         foreach ($config['headers'] ?? [] as $header) {
-            $data[] = $request->header($header);
+            // headers return in lower case from symphony
+            $header = strtolower($header);
+            if (!isset($requestHeaders[$header])) {
+                continue;
+            }
+
+            if (!is_array($requestHeaders[$header])) {
+                $data[] = $requestHeaders[$header];
+                continue;
+            }
+
+            foreach ($requestHeaders[$header] as $item) {
+                $data[] = $item;
+            }
+        }
+
+        // Process server params
+        $requestServers = $requestBag['servers'];
+        foreach ($config['servers'] ?? [] as $server) {
+            if (!isset($requestServers[$server])) {
+                continue;
+            }
+
+            if (!is_array($requestServers[$server])) {
+                $data[] = $requestServers[$server];
+                continue;
+            }
+
+            foreach ($requestServers[$server] as $item) {
+                $data[] = $item;
+            }
         }
 
         return implode(self::SEPARATOR, $data);

@@ -93,7 +93,13 @@ return [
     |
     | `headers` list all header names that the application may use to make the
     | idempotent key/hash unique. It's important to mention that the header's name
-    | should exist, as the package ignores non-existence headers.
+    | should exist, as the package does not change the name in any way and ignores
+    | non-existence params
+    |
+    | `servers` list all server parameters that the application may use to make the
+    | idempotent key/hash unique. It's important to mention that the server's param
+    | should exist, as the package does not change the param in any way and ignores
+    | non-existence params.
     |
     */
 
@@ -103,12 +109,15 @@ return [
             'ttl' => 100,
             'timeout' => 5,
             'fields' => ['first_name', 'last_name', 'email'],
-            'headers' => ['ip'],
+            'headers' => ['User-Agent'],
+            'servers' => ['REMOTE_ADDR']
         ],
         'news-post' => [
             'storage' => 'redis',
             'ttl' => 100,
             'fields' => ['title', 'summary'],
+            'headers' => ['User-Agent'],
+            'servers' => ['REMOTE_ADDR']
         ],
     ]
 ];
