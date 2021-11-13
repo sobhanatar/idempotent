@@ -15,9 +15,9 @@ use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage, MysqlStorage};
 
 class Idempotent
 {
-    protected const SEPARATOR = '_';
+    public const SEPARATOR = '_';
 
-    protected const ROUTE_SEPARATOR = '.';
+    public const ROUTE_SEPARATOR = '.';
 
     /**
      * Get the entity's name from the route's name and then acquire its config
@@ -45,13 +45,13 @@ class Idempotent
      *
      * @param Request $request
      * @param string $entity
-     * @param array $config
+     * @param array|null $config
      * @return void
      */
-    public function validateEntity(Request $request, string $entity, array $config): void
+    public function validateEntity(Request $request, string $entity, ?array $config): void
     {
-        if (!isset($config)) {
-            throw new InvalidArgumentException(sprintf('Entity `%s` does not exists', $entity));
+        if (!isset($config) || count($config) === 0) {
+            throw new InvalidArgumentException(sprintf('Entity `%s` does not exists or is empty', $entity));
         }
 
         if (strtoupper($request->method()) !== SymphonyRequest::METHOD_POST) {
@@ -105,48 +105,14 @@ class Idempotent
      */
     public function makeSignature(array $requestBag, string $entity, array $config): string
     {
-        $data[] = $entity;
-        foreach ($config['fields'] as $field) {
-            $data[] = $requestBag['fields'][$field];
-        }
+        $baseSignature = array_merge(
+            [$entity],
+            $this->getFieldsFromRequest($requestBag['fields'], $config['fields']),
+            $this->getHeadersFromRequest($requestBag['headers'], $config['headers']),
+            $this->getServerFromRequest($requestBag['servers'], $config['servers']),
+        );
 
-        //Process header names
-        $requestHeaders = $requestBag['headers'];
-        foreach ($config['headers'] ?? [] as $header) {
-            // headers return in lower case from symphony
-            $header = strtolower($header);
-            if (!isset($requestHeaders[$header])) {
-                continue;
-            }
-
-            if (!is_array($requestHeaders[$header])) {
-                $data[] = $requestHeaders[$header];
-                continue;
-            }
-
-            foreach ($requestHeaders[$header] as $item) {
-                $data[] = $item;
-            }
-        }
-
-        // Process server params
-        $requestServers = $requestBag['servers'];
-        foreach ($config['servers'] ?? [] as $server) {
-            if (!isset($requestServers[$server])) {
-                continue;
-            }
-
-            if (!is_array($requestServers[$server])) {
-                $data[] = $requestServers[$server];
-                continue;
-            }
-
-            foreach ($requestServers[$server] as $item) {
-                $data[] = $item;
-            }
-        }
-
-        return implode(self::SEPARATOR, $data);
+        return implode(self::SEPARATOR, $baseSignature);
     }
 
     /**
@@ -203,5 +169,87 @@ class Idempotent
         $res = $response ?? trans('idempotent.' . $entity);
 
         return json_encode($res, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Create fields part of signature
+     *
+     * @param array $requestFields
+     * @param array $configFields
+     * @return array
+     */
+    protected function getFieldsFromRequest(array $requestFields, array $configFields): array
+    {
+        foreach ($configFields as $field) {
+            $data[] = $requestFields[$field];
+        }
+
+        return $data ?? [];
+    }
+
+    /**
+     * Create headers part of signature
+     *
+     * @param array $requestHeaders
+     * @param array $configHeaders
+     * @return array
+     */
+    protected function getHeadersFromRequest(array $requestHeaders, array $configHeaders): array
+    {
+        if (!isset($configHeaders)) {
+            return [];
+        }
+
+        $data = [];
+        foreach ($configHeaders ?? [] as $header) {
+            // headers return in lower case from symphony
+            $header = strtolower($header);
+            if (!isset($requestHeaders[$header])) {
+                continue;
+            }
+
+            if (!is_array($requestHeaders[$header])) {
+                $data[] = $requestHeaders[$header];
+                continue;
+            }
+
+            foreach ($requestHeaders[$header] as $item) {
+                $data[] = $item;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Create server part of signature
+     *
+     * @param array $requestServers
+     * @param array $configServers
+     * @return array
+     */
+    protected function getServerFromRequest(array $requestServers, array $configServers): array
+    {
+        if (!isset($configServers)) {
+            return [];
+        }
+
+        $data = [];
+        foreach ($configServers ?? [] as $server) {
+            if (!isset($requestServers[$server])) {
+                continue;
+            }
+
+            if (!is_array($requestServers[$server])) {
+                $data[] = $requestServers[$server];
+                continue;
+            }
+
+            foreach ($requestServers[$server] as $item) {
+                $data[] = $item;
+            }
+        }
+
+        return $data;
     }
 }
