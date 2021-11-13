@@ -3,8 +3,6 @@
 namespace Sobhanatar\Idempotent\Tests;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Sobhanatar\Idempotent\Contracts\MysqlStorage;
 
 class HashTest extends TestCase
@@ -62,11 +60,22 @@ class HashTest extends TestCase
         $algos = hash_algos();
         foreach ($algos as $algo) {
             $firstHash = hash($algo, 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-            Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley
+            Ipsum has been the industry standard dummy text ever since the 1500s, when an unknown printer took a galley
              of type and scrambled it to make a type specimen book.');
             $secondHash = hash($algo, 'Hello Idempotent');
 
             $this->assertTrue(true, strlen($firstHash) === strlen($secondHash));
         }
+    }
+
+    /**
+     * @test
+     */
+    public function assert_wrong_hash_name_throw_exception(): void
+    {
+        $wrongHashAlgorithm = 'non-exiting-hash-name';
+        $this->expectException(\ErrorException::class);
+        $this->expectExceptionMessage(sprintf('hash(): Unknown hashing algorithm: %s', $wrongHashAlgorithm));
+        $hash = hash($wrongHashAlgorithm, 'blah-blah-blah');
     }
 }
