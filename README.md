@@ -31,27 +31,26 @@ To use idempotent package, you need set the options as per the need of your serv
 The configuration file is self-documented so that you can find your way through.
 
 The next step is deciding on how you want to control the idempotency of your service. Idempotent package provides two
-middlewares that can help you achieve the idempotency; `IdempotentHeader`, and `IdempotentVerify`. Don't forget to
+middlewares that can help you achieve the idempotency; `IdempotentHeader`, and `VerifyIdempotent`. Don't forget to
 register the middleware in `Kernel.php`.
 
 ### IdempotentHeader
 
-`IdempotentHeader` makes an idempotent key/hash based on the entity's `fields` and put it in the header of request. The
-assumption in this middleware is that the developer will remain responsible for the logic of using the idempotent
-key/hash.
+`IdempotentHeader` makes an idempotent key/hash based on the entity's `fields` and `headers` and put it in the header of
+request. The assumption in this middleware is that the developer will remain responsible for the logic of using the
+idempotent header.
 
 ### VerifyIdempotent
 
 `VerifyIdempotent` handles all the required steps for making an endpoint idempotent. The steps are as follows:
 
 1. Get the `entity` configuration
-2. Create an idempotent key/hash based on the entity's `fields`.
+2. Create an idempotent key/hash based on the entity's `fields` and `headers`.
 3. Check if the idempotent key/hash exists in the selected `storage`.
 4. If it doesn't exist:
     1. A new record with the status of `progress` be created with the entity's `timeout,` and it continues to the logic
        of the service
-    2. When code execution has finished, the response to the client updates the `status` and `response` fields of the
-       cache.
+    2. When code execution has finished, the response to the client updates the `status` and `response` of the cache.
 5. If it exists:
     1. If the `status` is `done` or `fail`, then the `response` will be read from storage and replied to the user.
     2. If the `status` is `progress`, the message in `idempotent` language file for that `entity` will be return as
@@ -62,7 +61,7 @@ routes.
 
 ## Purging Idempotent Keys/Hashes
 
-If you use mysql as the storage, it's important to purge the expired keys/hashes. Idempotent included
+If you use `mysql` as the storage, it's important to purge the expired keys/hashes. Idempotent included
 `idempotent:purge` Artisan command can do this for you.
 
 ```bash
@@ -103,26 +102,8 @@ If you discover any security-related issues, please email sobhanattar@gmail.com 
 
 ## Credits
 
-- [Sobhan Atar][link-author]
+- [Sobhan Atar](https://github.com/sobhanatar)
 
 ## License
 
 Idempotent is open-sourced software licensed under the [MIT license](LICENSE.md).
-
-[ico-version]: https://img.shields.io/packagist/v/sobhanatar/idempotent.svg?style=flat-square
-
-[ico-downloads]: https://img.shields.io/packagist/dt/sobhanatar/idempotent.svg?style=flat-square
-
-[ico-travis]: https://img.shields.io/travis/sobhanatar/idempotent/master.svg?style=flat-square
-
-[ico-styleci]: https://styleci.io/repos/12345678/shield
-
-[link-packagist]: https://packagist.org/packages/sobhanatar/idempotent
-
-[link-downloads]: https://packagist.org/packages/sobhanatar/idempotent
-
-[link-travis]: https://travis-ci.org/sobhanatar/idempotent
-
-[link-styleci]: https://styleci.io/repos/12345678
-
-[link-author]: https://github.com/sobhanatar
