@@ -40,8 +40,8 @@ class VerifyIdempotent
                 'headers' => $request->headers->all(),
                 'servers' => $request->server->all()
             ];
-            $key = $this->idempotent->makeSignature($requestBag, $entity, $config);
-            $hash = $this->idempotent->hash($key);
+            $signature = $this->idempotent->makeSignature($requestBag, $entity, $config);
+            $hash = $this->idempotent->hash($signature);
 
             [$exists, $result] = $this->idempotent->verify($service, $entity, $config, $hash);
             if ($exists) {
