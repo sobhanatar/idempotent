@@ -200,25 +200,26 @@ class Idempotent
             return [];
         }
 
-        $data = [];
-        foreach ($configHeaders ?? [] as $header) {
-            // headers return in lower case from symphony
+        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
+
+        $headers = [];
+        foreach ($configHeaders as $header) {
             $header = strtolower($header);
             if (!isset($requestHeaders[$header])) {
                 continue;
             }
 
             if (!is_array($requestHeaders[$header])) {
-                $data[] = $requestHeaders[$header];
+                $headers[] = $requestHeaders[$header];
                 continue;
             }
 
             foreach ($requestHeaders[$header] as $item) {
-                $data[] = $item;
+                $headers[] = $item;
             }
         }
 
-        return $data;
+        return $headers;
     }
 
     /**
@@ -234,22 +235,25 @@ class Idempotent
             return [];
         }
 
-        $data = [];
-        foreach ($configServers ?? [] as $server) {
+        $requestServers = array_change_key_case($requestServers, CASE_LOWER);
+
+        $servers = [];
+        foreach ($configServers as $server) {
+            $server = strtolower($server);
             if (!isset($requestServers[$server])) {
                 continue;
             }
 
             if (!is_array($requestServers[$server])) {
-                $data[] = $requestServers[$server];
+                $servers[] = $requestServers[$server];
                 continue;
             }
 
             foreach ($requestServers[$server] as $item) {
-                $data[] = $item;
+                $servers[] = $item;
             }
         }
 
-        return $data;
+        return $servers;
     }
 }

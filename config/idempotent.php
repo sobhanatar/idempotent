@@ -24,7 +24,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option controls the header name being used for storing the idempotency
-    | key in header of request
+    | signature in header of request
     |
     */
 
@@ -35,9 +35,9 @@ return [
     | Table name
     |--------------------------------------------------------------------------
     |
-    | The nae of the table that will be used to store the idempotent key of
+    | The nae of the table that will be used to store the idempotent signature of
     | requests. This table is being used only if you want to use database for
-    | storing the idempotent keys.
+    | storing the idempotent signatures.
     |
     */
 
@@ -77,29 +77,29 @@ return [
     | `64` characters.
     |
     | `storage`, shows the storage you want to use for storing the
-    |  idempotent key/hash. Currently, available options are `mysql` and `redis`.
+    |  idempotent signature. Currently, available options are `mysql` and `redis`.
     | Configuration of redis should be set in this configuration file, however,
     | the mysql configuration will be read from `config\database` file.
     |
-    | `ttl`, is the time for in seconds, in that this key is available and being
-    | checked with other requests idempotent keys/hashes.
+    | `ttl`, is the time for in seconds, in that this signature is available and being
+    | checked with other requests idempotent signatures.
     |
     | `timeout` is related to mysql storage and it tries to obtain a lock using a
     | `timeout` in seconds. A negative `timeout` value means infinite timeout.
     |
     | `fields` as its name suggests, is a list from the names of the fields,
-    | together make a request (idempotent-key) unique - in regards to the `ttl` of
+    | together make a request (idempotent-signature) unique - in regards to the `ttl` of
     | an entity.
     |
     | `headers` list all header names that the application may use to make the
-    | idempotent key/hash unique. It's important to mention that the header's name
+    | idempotent signature unique. It's important to mention that the header's name
     | should exist, as the package does not change the name in any way and ignores
-    | non-existence params
+    | non-existence parameters.
     |
     | `servers` list all server parameters that the application may use to make the
-    | idempotent key/hash unique. It's important to mention that the server's param
-    | should exist, as the package does not change the param in any way and ignores
-    | non-existence params.
+    | idempotent signature unique. It's important to mention that the server's param
+    | should exist, as the package does not change the name in any way and ignores
+    | non-existence parameters.
     |
     */
 
