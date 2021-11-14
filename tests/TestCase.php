@@ -13,7 +13,7 @@ abstract class TestCase extends TestBench
     protected const TEST_APP = __DIR__ . '/../testbench/laravel';
     protected const MIGRATION_PATH = __DIR__ . '/../database/migrations';
 
-    //.env should be in template folder of testbench
+    //.env should be in testbench/template
     protected bool $loadEnvironmentVariables = true;
 
     public static function setUpBeforeClass(): void
