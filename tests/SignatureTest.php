@@ -182,4 +182,42 @@ class SignatureTest extends TestCase
         $this->assertContains('test', $signature);
         $this->assertContains('127.0.0.2', $signature);
     }
+
+    /**
+     * @test
+     */
+    public function assert_make_signature_works_with_non_existing_key_header(): void
+    {
+        $config = [
+            'fields' => ['name', 'surname'],
+            'headers' => ['non-existing-header-key'],
+        ];
+
+        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
+        $signature = explode(Idempotent::SEPARATOR, $signature);
+
+        $this->assertIsArray($signature);
+        $this->assertContains('news', $signature);
+        $this->assertContains('idempotent', $signature);
+        $this->assertContains('package', $signature);
+    }
+
+    /**
+     * @test
+     */
+    public function assert_make_signature_works_with_non_existing_key_servers(): void
+    {
+        $config = [
+            'fields' => ['name', 'surname'],
+            'servers' => ['non-existing-server-key'],
+        ];
+
+        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
+        $signature = explode(Idempotent::SEPARATOR, $signature);
+
+        $this->assertIsArray($signature);
+        $this->assertContains('news', $signature);
+        $this->assertContains('idempotent', $signature);
+        $this->assertContains('package', $signature);
+    }
 }

@@ -35,11 +35,12 @@ trait Signature
      */
     protected function getFieldsFromRequest(array $requestFields, array $configFields): array
     {
+        $fields = [];
         foreach ($configFields as $field) {
-            $data[] = $requestFields[$field];
+            $fields[] = $requestFields[$field];
         }
 
-        return $data ?? [];
+        return $fields;
     }
 
     /**
