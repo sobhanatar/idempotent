@@ -15,7 +15,7 @@
         "Idempotent",
         "Idempotency",
         "Idempotent-request",
-        "Laravel"
+        "Idempotent-Laravel"
     ],
     "require": {
         "php": "~7.4|~8",
