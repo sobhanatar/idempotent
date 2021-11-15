@@ -21,7 +21,8 @@
         "php": "~7.4|~8",
         "ext-json": "*",
         "ext-pdo": "*",
-        "malkusch/lock": "^2.2"
+        "malkusch/lock": "^2.2",
+        "spatie/async": "^1.5"
     },
     "require-dev": {
         "orchestra/testbench": "^6.23"
