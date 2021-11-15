@@ -4,6 +4,7 @@ namespace Sobhanatar\Idempotent\Contracts;
 
 use PDO;
 use malkusch\lock\mutex\MySQLMutex;
+use Symfony\Component\HttpFoundation\Response;
 
 class MysqlStorage implements Storage
 {
@@ -48,23 +49,23 @@ class MysqlStorage implements Storage
     public function update($response, string $entity, string $hash): void
     {
         $sql = sprintf(
-            "%s %s",
-            "UPDATE {$this->table} SET status=:status, response=:response, updated_ut=:updated_ut, updated_at=:updated_at",
+            "%s %s %s",
+            "UPDATE {$this->table}",
+            "SET status=:status, response=:response, code=:code, updated_ut=:updated_ut, updated_at=:updated_at",
             "WHERE entity=:entity and hash=:hash"
         );
+
         $now = now();
+        $code = $response->getStatusCode();
         $data = [
             'response' => serialize($response->getContent()),
+            'status' => $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED ? Storage::DONE : Storage::FAIL,
+            'code' => $code,
             'entity' => $entity,
             'hash' => $hash,
             'updated_ut' => $now->unix(),
             'updated_at' => $now->format('Y-m-d H:i:s'),
         ];
-        $statusCode = $response->getStatusCode();
-        $data['status'] = 'fail';
-        if ($statusCode >= 200 && $statusCode < 300) {
-            $data['status'] = 'done';
-        }
 
         $this->pdo->prepare($sql)->execute($data);
     }
@@ -79,7 +80,7 @@ class MysqlStorage implements Storage
     public function get(string $entity, string $hash): array
     {
         $sql = sprintf(
-            "SELECT `id`, `status`, `response` FROM %s WHERE `entity` = '%s' AND `expired_ut` > %d AND `hash` = '%s' ORDER BY `id` DESC LIMIT 1",
+            "SELECT * FROM %s WHERE `entity` = '%s' AND `expired_ut` > %d AND `hash` = '%s' ORDER BY `id` DESC LIMIT 1",
             $this->table,
             $entity,
             now()->unix(),

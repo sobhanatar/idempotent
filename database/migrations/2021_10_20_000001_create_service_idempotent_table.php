@@ -39,6 +39,7 @@ class CreateServiceIdempotentTable extends Migration
             $table->string('hash')->index()->comment('the hash of configured fields');
             $table->string('status', 191)->nullable(true)->comment('the status of operation, progress, done, failure');
             $table->text('response')->nullable(true)->comment('the complete body of response should be returned');
+            $table->unsignedTinyInteger('code')->nullable(true)->comment('the status code of response');
             $table->unsignedInteger('expired_ut')->comment('the expire time in unix timestamp');
             $table->unsignedInteger('created_ut')->comment('the creation time in unix timestamp');
             $table->timestamp('created_at')->comment('the creation timestamp');
