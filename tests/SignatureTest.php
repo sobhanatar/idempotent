@@ -2,8 +2,6 @@
 
 namespace Sobhanatar\Idempotent\Tests;
 
-use Illuminate\Support\Facades\DB;
-use Sobhanatar\Idempotent\Contracts\MysqlStorage;
 use Sobhanatar\Idempotent\Idempotent;
 
 class SignatureTest extends TestCase
