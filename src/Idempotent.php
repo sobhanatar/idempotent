@@ -83,6 +83,9 @@ class Idempotent
                 return new MysqlStorage(DB::connection(Storage::MYSQL)->getPdo());
             case Storage::REDIS:
                 $redis = new Redis();
+                if(config('idempotent.redis.password')){
+                    $redis->auth(config('idempotent.redis.password'));
+                }
                 $redis->connect(
                     config('idempotent.redis.host'),
                     config('idempotent.redis.port'),
@@ -161,8 +164,6 @@ class Idempotent
      */
     public function prepareResponse(string $entity, ?string $response): string
     {
-        $res = $response ?? trans('idempotent.' . $entity);
-
-        return json_encode($res, JSON_THROW_ON_ERROR);
+        return unserialize($response) ?? trans('idempotent.' . $entity);
     }
 }
