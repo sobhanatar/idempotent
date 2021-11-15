@@ -4,7 +4,7 @@ namespace Sobhanatar\Idempotent\Contracts;
 
 use Redis;
 use malkusch\lock\mutex\PHPRedisMutex;
-use Symfony\Component\HttpFoundation\Response as SymphonyResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class RedisStorage implements Storage
 {
@@ -28,12 +28,12 @@ class RedisStorage implements Storage
             $key = $this->getKey($entity, $hash);
             $result = $this->redis->get($key);
             if ($result) {
-                return [true, unserialize($result, ['allowed_classes' => true])];
+                return [true, json_decode($result, true, 512, JSON_THROW_ON_ERROR)];
             }
 
             $this->redis->set(
-                $this->getKey($entity, $hash),
-                serialize(collect(['status' => 'progress', 'response' => ''])),
+                $key,
+                json_encode(['status' => 'progress', 'response' => ''], JSON_THROW_ON_ERROR),
                 $config['ttl']
             );
             return [false, null];
@@ -53,14 +53,11 @@ class RedisStorage implements Storage
                 return;
             }
 
-            $status = 'fail';
-            $statusCode = $response->getStatusCode();
-            if ($statusCode >= SymphonyResponse::HTTP_OK && $statusCode <= SymphonyResponse::HTTP_IM_USED) {
-                $status = 'done';
-            }
+            $code = $response->getStatusCode();
+            $status = $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED ? Storage::DONE : Storage::FAIL;
 
-            $data = ['status' => $status, 'response' => $response->getContent()];
-            $this->redis->set($key, serialize(collect($data)));
+            $data = ['status' => $status, 'response' => serialize($response->getContent()), 'code' => $code];
+            $this->redis->set($key, json_encode($data, JSON_THROW_ON_ERROR));
         });
     }
 
