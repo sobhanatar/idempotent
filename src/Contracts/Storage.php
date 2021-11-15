@@ -10,6 +10,9 @@ interface Storage
 {
     public const MYSQL = 'mysql';
     public const REDIS = 'redis';
+    public const DONE = 'done';
+    public const FAIL = 'fail';
+    public const PROGRESS = 'progress';
 
     /**
      * Check if hash existence, and set non-existent hash in storage
