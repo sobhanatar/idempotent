@@ -56,6 +56,7 @@ return [
     'redis' => [
         'host' => 'localhost',
         'port' => 6379,
+        'password' => null,
         'timeout' => 0.0,
         'reserved' => null,
         'retryInterval' => 0,
