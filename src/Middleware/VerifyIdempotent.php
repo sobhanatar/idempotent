@@ -46,21 +46,30 @@ class VerifyIdempotent
             [$exists, $result] = $this->idempotent->verify($service, $entity, $config, $hash);
             if ($exists) {
                 $response = $this->idempotent->prepareResponse($entity, $result['response']);
-                return $request->isJson()
-                    ? response($response, $result['code'])->header('Content-Type', 'application/json')
-                    : response($response, $result['code']);
+                return $this->response($request, $response, (int)$result['code']);
             }
 
-            /**@var Response $response */
             $response = $next($request);
             $this->idempotent->update($service, $response, $entity, $hash);
-
-            return $request->isJson()
-                ? response($response->getContent(), $response->getStatusCode())->header('Content-Type', 'application/json')
-                : response($response->getContent(), $response->getStatusCode());
+            return $this->response($request, $response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
             return response(['message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Prepare response
+     *
+     * @param Request $request
+     * @param string $response
+     * @param int $code
+     * @return Response
+     */
+    protected function response(Request $request, string $response, int $code): Response
+    {
+        return $request->expectsJson()
+            ? response($response, $code)->header('Content-Type', 'application/json')
+            : response($response, $code);
     }
 }
