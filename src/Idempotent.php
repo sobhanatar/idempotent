@@ -160,7 +160,6 @@ class Idempotent
      * @param string $entity
      * @param string|null $response
      * @return string
-     * @throws JsonException
      */
     public function prepareResponse(string $entity, ?string $response): string
     {
