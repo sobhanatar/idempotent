@@ -86,6 +86,11 @@ protected function schedule(Schedule $schedule)
 
 ```
 
+## Under the hood
+
+This package is relied on [php-lock/lock](https://github.com/php-lock/lock) for locking mechanism and
+also [spatie/async](https://github.com/spatie/async) for testing the locking mechanism.
+
 ## Testing
 
 ```bash
