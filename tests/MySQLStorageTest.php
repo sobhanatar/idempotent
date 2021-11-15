@@ -6,7 +6,7 @@ use Exception;
 use Spatie\Async\Pool;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Support\Facades\Schema;
-use Sobhanatar\Idempotent\Contracts\MysqlStorage;
+use Sobhanatar\Idempotent\Contracts\{Storage, MysqlStorage};
 
 class MySQLStorageTest extends TestCase
 {
@@ -72,7 +72,14 @@ class MySQLStorageTest extends TestCase
         $pool->wait();
         $this->assertEquals(1, $this->counter);
         $this->assertEquals($config['processes'], $i);
-        $this->assertDatabaseHas($config['table'], ['hash' => 'some hash', 'entity' => 'request'], 'mysql');
+        $this->assertDatabaseHas(
+            $config['table'],
+            [
+                'hash' => 'some hash',
+                'entity' => 'request',
+                'status' => Storage::PROGRESS
+            ],
+            'mysql');
         $this->assertDatabaseCount($config['table'], 1, 'mysql');
     }
 }
