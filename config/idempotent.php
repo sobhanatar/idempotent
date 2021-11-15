@@ -70,41 +70,42 @@ return [
     | Entities control the routes that idempotent service should act on them.
     | The structure is as follows:
     |
-    | The key of each entity is the name of the route you want the middleware to
-    | act on. If you use `.` notation on naming the routes, you should make sure
-    | that replace `.` with `-` for naming the entities. Make sure that if you are
-    | using `mysql` storage on an entity, the name's length should not be more than
-    | `64` characters.
+    | The key of each entity is the name of the route you want the middleware
+    | to act on. If you use "." notation on naming the routes, you should make
+    | sure to replace it with "_" for naming the entities. Make sure that if you
+    | are using "mysql" storage on an entity, the name's length should not be
+    | more than "64" characters.
     |
-    | `storage`, shows the storage you want to use for storing the
-    |  idempotent signature. Currently, available options are `mysql` and `redis`.
+    | "storage", shows the storage you want to use for storing the idempotent
+    | signature. Currently, available options are "mysql" and "redis".
     | Configuration of redis should be set in this configuration file, however,
-    | the mysql configuration will be read from `config\database` file.
+    | the mysql configuration will be read from "config\database" file.
     |
-    | `ttl`, is the time for in seconds, in that this signature is available and being
-    | checked with other requests idempotent signatures.
+    | "ttl", is the time for in seconds, in that this signature is available
+    | and being checked with other requests idempotent signatures.
     |
-    | `timeout` is related to mysql storage and it tries to obtain a lock using a
-    | `timeout` in seconds. A negative `timeout` value means infinite timeout.
+    | "timeout" is related to mysql storage and it tries to obtain a lock
+    | using this field in seconds. A negative value means infinite timeout
+    | which is not recommended.
     |
-    | `fields` as its name suggests, is a list from the names of the fields,
-    | together make a request (idempotent-signature) unique - in regards to the `ttl` of
-    | an entity.
+    | "fields" as its name suggests, is a list from the names of the fields,
+    | together make a request (idempotent-signature) unique - in regards to
+    | the "ttl" of an entity.
     |
-    | `headers` list all header names that the application may use to make the
-    | idempotent signature unique. It's important to mention that the header's name
-    | should exist, as the package does not change the name in any way and ignores
-    | non-existence parameters.
+    | "headers" list all header names that the application may use to make the
+    | idempotent signature unique. It's important to mention that the header's
+    | name should exist, as the package does not change the name in any way and
+    | ignores non-existence parameters.
     |
-    | `servers` list all server parameters that the application may use to make the
-    | idempotent signature unique. It's important to mention that the server's param
-    | should exist, as the package does not change the name in any way and ignores
-    | non-existence parameters.
+    | "servers" list all server parameters that the application may use to make
+    | the idempotent signature unique. It's important to mention that the server's
+    | parameter should exist, as the package does not change the name in any way
+    | and ignores non-existence parameters.
     |
     */
 
     'entities' => [
-        'users-post' => [
+        'users_post' => [
             'storage' => 'mysql',
             'ttl' => 100,
             'timeout' => 5,
@@ -112,7 +113,7 @@ return [
             'headers' => ['User-Agent'],
             'servers' => ['REMOTE_ADDR']
         ],
-        'news-post' => [
+        'news_post' => [
             'storage' => 'redis',
             'ttl' => 100,
             'fields' => ['title', 'summary'],
