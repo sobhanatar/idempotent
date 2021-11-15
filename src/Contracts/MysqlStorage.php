@@ -54,7 +54,7 @@ class MysqlStorage implements Storage
         );
         $now = now();
         $data = [
-            'response' => $response->getContent(),
+            'response' => serialize($response->getContent()),
             'entity' => $entity,
             'hash' => $hash,
             'updated_ut' => $now->unix(),
