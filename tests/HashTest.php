@@ -14,7 +14,7 @@ class HashTest extends TestCase
     public function assert_idempotent_table_supports_all_algorithm_outputs(): void
     {
         $this->loadMigrationsFrom(self::MIGRATION_PATH);
-        $storageService = new MysqlStorage(DB::connection('mysql')->getPdo());
+        $storageService = new MysqlStorage(DB::connection('mysql')->getPdo(), config('idempotent.table'));
 
         $algos = hash_algos();
         foreach ($algos as $key => $algo) {
@@ -34,7 +34,7 @@ class HashTest extends TestCase
     public function assert_idempotent_table_supports_all_unicode_algorithm_outputs(): void
     {
         $this->loadMigrationsFrom(self::MIGRATION_PATH);
-        $storageService = new MysqlStorage(DB::connection('mysql')->getPdo());
+        $storageService = new MysqlStorage(DB::connection('mysql')->getPdo(), config('idempotent.table'));
 
         $algos = hash_algos();
         foreach ($algos as $key => $algo) {

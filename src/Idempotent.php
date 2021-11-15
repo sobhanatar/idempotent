@@ -80,10 +80,10 @@ class Idempotent
     {
         switch ($connection) {
             case Storage::MYSQL:
-                return new MysqlStorage(DB::connection(Storage::MYSQL)->getPdo());
+                return new MysqlStorage(DB::connection(Storage::MYSQL)->getPdo(), config('idempotent.table'));
             case Storage::REDIS:
                 $redis = new Redis();
-                if(config('idempotent.redis.password')){
+                if (config('idempotent.redis.password')) {
                     $redis->auth(config('idempotent.redis.password'));
                 }
                 $redis->connect(

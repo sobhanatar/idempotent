@@ -20,11 +20,12 @@ class MysqlStorage implements Storage
 
     /**
      * @param PDO $pdo
+     * @param string $table
      */
-    public function __construct(PDO $pdo)
+    public function __construct(PDO $pdo, string $table)
     {
         $this->pdo = $pdo;
-        $this->table = config('idempotent.table');
+        $this->table = $table;
     }
 
     /**
