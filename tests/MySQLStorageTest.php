@@ -130,7 +130,6 @@ class MySQLStorageTest extends TestCase
      */
     public function assert_multiple_request_create_multiple_hash_with_different_entity(): void
     {
-        $i = 0;
         $config = [
             'processes' => 5,
             'timeout' => 10,
