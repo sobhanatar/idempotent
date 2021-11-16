@@ -4,12 +4,10 @@ namespace Sobhanatar\Idempotent;
 
 use Redis;
 use Exception;
-use JsonException;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\Request as SymphonyRequest;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage, MysqlStorage};
 
@@ -56,8 +54,11 @@ class Idempotent
             throw new InvalidArgumentException(sprintf('Entity `%s` does not exists or is empty', $entity));
         }
 
-        if (strtoupper($request->method()) !== SymphonyRequest::METHOD_POST) {
-            throw new MethodNotAllowedException([SymphonyRequest::METHOD_POST], 'Route method is not POST');
+        if (strtoupper($request->method()) !== Request::METHOD_POST) {
+            throw new MethodNotAllowedException(
+                [Request::METHOD_POST],
+                sprintf('Route method is not POST, it is %s', $request->method())
+            );
         }
 
         if (!isset($config['fields'])) {
