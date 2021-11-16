@@ -54,7 +54,7 @@ class VerifyIdempotent
             return $this->response($request, $response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
-            return response(['message' => $e->getMessage()]);
+            return response(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
