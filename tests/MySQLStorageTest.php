@@ -5,7 +5,7 @@ namespace Sobhanatar\Idempotent\Tests;
 use Exception;
 use Spatie\Async\Pool;
 use Sobhanatar\Idempotent\Idempotent;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\{DB, Schema};
 use Sobhanatar\Idempotent\Contracts\{Storage, MysqlStorage};
 
 class MySQLStorageTest extends TestCase
@@ -81,5 +81,46 @@ class MySQLStorageTest extends TestCase
             ],
             'mysql');
         $this->assertDatabaseCount($config['table'], 1, 'mysql');
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function assert_multiple_request_create_new_hash_in_database_after_ttl(): void
+    {
+        $config = [
+            'timeout' => 10,
+            'ttl' => 1,
+            'table' => config('idempotent.table')
+        ];
+        $this->loadMigrationsFrom(self::MIGRATION_PATH);
+        $service = new MysqlStorage(DB::connection('mysql')->getPDO(), $config['table']);
+        $res = (new Idempotent())->verify($service, 'request', $config, 'some hash');
+
+        $this->assertFalse($res[0]);
+        $this->assertDatabaseHas(
+            $config['table'],
+            [
+                'hash' => 'some hash',
+                'entity' => 'request',
+                'status' => Storage::PROGRESS
+            ],
+            'mysql');
+        $this->assertDatabaseCount($config['table'], 1, 'mysql');
+        sleep($config['ttl'] + 1);
+
+        $res = (new Idempotent())->verify($service, 'request', $config, 'some hash');
+
+        $this->assertFalse($res[0]);
+        $this->assertDatabaseHas(
+            $config['table'],
+            [
+                'hash' => 'some hash',
+                'entity' => 'request',
+                'status' => Storage::PROGRESS
+            ],
+            'mysql');
+        $this->assertDatabaseCount($config['table'], 2, 'mysql');
     }
 }
