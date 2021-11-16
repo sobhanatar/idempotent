@@ -4,8 +4,8 @@ namespace Sobhanatar\Idempotent\Middleware;
 
 use Closure;
 use Exception;
+use Illuminate\Http\Request;
 use Sobhanatar\Idempotent\Idempotent;
-use Illuminate\Http\{Request, Response};
 
 class IdempotentHeader
 {
@@ -27,9 +27,9 @@ class IdempotentHeader
      *
      * @param Request $request
      * @param Closure $next
-     * @return Response
+     * @return mixed
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         try {
             [$entity, $config] = $this->idempotent->resolveEntity($request);
