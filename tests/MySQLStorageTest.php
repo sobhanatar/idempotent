@@ -10,8 +10,6 @@ use Sobhanatar\Idempotent\Contracts\{Storage, MysqlStorage};
 
 class MySQLStorageTest extends TestCase
 {
-    public \PDO $pdo;
-
     public int $counter = 0;
 
     /**
@@ -123,7 +121,6 @@ class MySQLStorageTest extends TestCase
             'mysql');
         $this->assertDatabaseCount($config['table'], 2, 'mysql');
     }
-
 
     /**
      * @test
