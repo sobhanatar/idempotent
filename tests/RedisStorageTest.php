@@ -25,7 +25,7 @@ class RedisStorageTest extends TestCase
      */
     public function assert_redis_node_exists(): void
     {
-        $this->assertTrue($this->setRedis());
+        $this->assertTrue($this->getRedisConnection());
     }
 
     /**
@@ -60,7 +60,7 @@ class RedisStorageTest extends TestCase
         $redisInstance = new RedisStorage($redisMock);
         $key = $redisInstance->getKey($config['entity'], $config['hash']);
 
-        $this->setRedis($config);
+        $this->getRedisConnection($config);
         $this->redis->del($key);
 
         $pool = Pool::create();
@@ -123,7 +123,7 @@ class RedisStorageTest extends TestCase
         $redisInstance = new RedisStorage($redisMock);
         $key = $redisInstance->getKey($config['entity'], $config['hash']);
 
-        $this->setRedis($config);
+        $this->getRedisConnection($config);
         $this->redis->del($key);
 
         $service = new RedisStorage($this->redis);
@@ -144,7 +144,6 @@ class RedisStorageTest extends TestCase
         $this->assertArrayHasKey('response', $resArray);
         $this->assertEquals(Storage::PROGRESS, $resArray['status']);
     }
-
 
     /**
      * @test
@@ -171,7 +170,7 @@ class RedisStorageTest extends TestCase
             $config['keys'][] = $redisInstance->getKey($config['entities'][$i], $config['hash']);
         }
 
-        $this->setRedis($config);
+        $this->getRedisConnection($config);
         $this->redis->del($config['keys']);
 
         $pool = Pool::create();
@@ -212,7 +211,7 @@ class RedisStorageTest extends TestCase
      * @param array $config
      * @return bool
      */
-    private function setRedis(array $config = []): bool
+    private function getRedisConnection(array $config = []): bool
     {
         $this->redis = new Redis();
         $auth = $config['password'] ?? config('idempotent.redis.password');
