@@ -13,6 +13,9 @@ class RedisStorage implements Storage
      */
     private Redis $redis;
 
+    /**
+     * @param Redis $redis
+     */
     public function __construct(Redis $redis)
     {
         $this->redis = $redis;
