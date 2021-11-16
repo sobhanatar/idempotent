@@ -68,7 +68,7 @@ class RedisStorage implements Storage
      * @param string $hash
      * @return string
      */
-    private function getKey(string $entity, string $hash): string
+    public function getKey(string $entity, string $hash): string
     {
         return sprintf("%s-%s", $entity, $hash);
     }
