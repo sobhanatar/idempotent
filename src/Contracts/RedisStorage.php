@@ -60,7 +60,7 @@ class RedisStorage implements Storage
             $status = $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED ? Storage::DONE : Storage::FAIL;
 
             $data = ['status' => $status, 'response' => serialize($response->getContent()), 'code' => $code];
-            $this->redis->set($key, json_encode($data, JSON_THROW_ON_ERROR));
+            $this->redis->set($key, json_encode($data, JSON_THROW_ON_ERROR), $this->redis->rawCommand("TTL", $key));
         });
     }
 
