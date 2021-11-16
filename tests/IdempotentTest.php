@@ -40,4 +40,17 @@ class IdempotentTest extends TestCase
 
         $this->assertInstanceOf(MysqlStorage::class, $service);
     }
+
+    /**
+     * @test
+     */
+    public function assert_storage_with_redis_connection_throw_exception_with_wrong_password(): void
+    {
+        $connection = 'redis';
+        config()->set('idempotent.redis.password', 'incorrect-password');
+        $this->expectException(\RedisException::class);
+        $this->expectExceptionMessage("Redis server went away");
+
+        (new Idempotent())->resolveStorageService($connection);
+    }
 }
