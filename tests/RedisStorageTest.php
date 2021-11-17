@@ -97,6 +97,7 @@ class RedisStorageTest extends TestCase
         $this->assertArrayHasKey('response', $res);
         $this->assertEquals(Storage::PROGRESS, $res['status']);
         $this->assertEquals($config['processes'], $i);
+        $this->redis->del($key);
     }
 
     /**
@@ -141,6 +142,8 @@ class RedisStorageTest extends TestCase
         $this->assertArrayHasKey('status', $resArray);
         $this->assertArrayHasKey('response', $resArray);
         $this->assertEquals(Storage::PROGRESS, $resArray['status']);
+
+        $this->redis->del($key);
     }
 
     /**
@@ -200,6 +203,7 @@ class RedisStorageTest extends TestCase
 
         $this->assertEquals($config['processes'], $this->counter);
         $this->assertTrue((bool)$this->redis->exists($config['keys'][0]));
+        $this->redis->del($config['keys']);
     }
 
     /**
