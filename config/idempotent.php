@@ -54,7 +54,7 @@ return [
     */
 
     'redis' => [
-        'host' => 'localhost',
+        'host' => '127.0.0.1',
         'port' => 6379,
         'password' => null,
         'timeout' => 0.0,
@@ -118,8 +118,8 @@ return [
             'storage' => 'redis',
             'ttl' => 100,
             'fields' => ['title', 'summary'],
-            'headers' => ['User-Agent'],
-            'servers' => ['REMOTE_ADDR']
+            'headers' => [],
+            'servers' => []
         ],
     ]
 ];
