@@ -32,7 +32,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Sobhanatar\\Idempotent\\": "src/"
+            "Sobhanatar\\Idempotent\\": "src/",
+            "Sobhanatar\\Idempotent\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
