@@ -4,7 +4,7 @@ namespace Sobhanatar\Idempotent\Tests;
 
 use Sobhanatar\Idempotent\{Contracts\MysqlStorage, Contracts\RedisStorage, Idempotent};
 
-class IdempotentTest extends TestCase
+class StorageServiceTest extends TestCase
 {
     /**
      * @test
