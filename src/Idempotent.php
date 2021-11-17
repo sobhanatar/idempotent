@@ -141,7 +141,7 @@ class Idempotent
     }
 
     /**
-     * update data of shared storage
+     * Update data of shared storage
      *
      * @param Storage $storage
      * @param $response

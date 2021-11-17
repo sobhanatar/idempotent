@@ -3,6 +3,7 @@
 namespace Sobhanatar\Idempotent\Tests;
 
 use Illuminate\Routing\Route;
+use JsonException;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
 use Sobhanatar\Idempotent\Contracts\Storage;
@@ -17,6 +18,7 @@ class VerifyIdempotentTest extends TestCase
 
     /**
      * @test
+     * @throws JsonException
      */
     public function assert_handle_works_with_mysql(): void
     {
@@ -26,6 +28,7 @@ class VerifyIdempotentTest extends TestCase
 
     /**
      * @test
+     * @throws JsonException
      */
     public function assert_handle_works_for_two_consecutive_request_with_mysql(): void
     {
@@ -39,7 +42,7 @@ class VerifyIdempotentTest extends TestCase
             ]];
         });
 
-        $this->assertEquals(json_encode(['message' => 'Hi Im created']), $response->getContent());
+        $this->assertEquals(json_encode(['message' => 'Hi Im created'], JSON_THROW_ON_ERROR), $response->getContent());
         $this->assertDatabaseHas(
             config('idempotent.table'),
             [
@@ -54,6 +57,7 @@ class VerifyIdempotentTest extends TestCase
 
     /**
      * @test
+     * @throws JsonException
      */
     public function assert_handle_works_with_redis(): void
     {
@@ -63,6 +67,7 @@ class VerifyIdempotentTest extends TestCase
 
     /**
      * @test
+     * @throws JsonException
      */
     public function assert_handle_works_for_two_consecutive_request_redis(): void
     {
@@ -77,9 +82,12 @@ class VerifyIdempotentTest extends TestCase
             ]];
         });
 
-        $this->assertEquals(json_encode(['message' => 'Hi Im created']), $response->getContent());
+        $this->assertEquals(json_encode(['message' => 'Hi Im created'], JSON_THROW_ON_ERROR), $response->getContent());
     }
 
+    /**
+     * Create an instance
+     */
     private function getRequest(): void
     {
         $this->request = new Request([], ['title' => 'some-title', 'summary' => 'some-summary']);
@@ -90,6 +98,13 @@ class VerifyIdempotentTest extends TestCase
         });
     }
 
+    /**
+     * It pass the first handle and assert the result based on connection
+     *
+     * @param string $connection
+     * @param int $ttl
+     * @throws JsonException
+     */
     private function firstTimeVerify(string $connection, int $ttl): void
     {
         config()->set('idempotent.entities.news_post.storage', $connection);
@@ -103,7 +118,7 @@ class VerifyIdempotentTest extends TestCase
             return response()->json(['message' => 'Hi Im created'], Response::HTTP_CREATED);
         });
 
-        $this->assertEquals(json_encode(['message' => 'Hi Im created']), $response->getContent());
+        $this->assertEquals(json_encode(['message' => 'Hi Im created'], JSON_THROW_ON_ERROR), $response->getContent());
         if ($connection === Storage::MYSQL) {
             $this->assertDatabaseHas(
                 config('idempotent.table'),

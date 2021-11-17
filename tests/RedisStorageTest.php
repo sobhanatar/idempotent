@@ -86,13 +86,11 @@ class RedisStorageTest extends TestCase
                 if (!$output[0]) {
                     $this->counter++;
                 }
-            })->catch(function (Exception $e) {
-                dump($e);
             });
         }
         $pool->wait();
-        $res = json_decode($this->redis->get($key), true, 512, JSON_THROW_ON_ERROR);
 
+        $res = json_decode($this->redis->get($key), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertEquals(1, $this->counter);
         $this->assertArrayHasKey('status', $res);
@@ -196,11 +194,10 @@ class RedisStorageTest extends TestCase
                 if (!$output[0]) {
                     $this->counter++;
                 }
-            })->catch(function (Exception $e) {
-                dump($e);
             });
         }
         $pool->wait();
+
         $this->assertEquals($config['processes'], $this->counter);
         $this->assertTrue((bool)$this->redis->exists($config['keys'][0]));
     }
@@ -218,6 +215,7 @@ class RedisStorageTest extends TestCase
         if ($auth) {
             $this->redis->auth($auth);
         }
+
         return $this->redis->connect(
             $config['host'] ?? config('idempotent.redis.host'),
             $config['port'] ?? config('idempotent.redis.port'),

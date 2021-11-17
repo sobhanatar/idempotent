@@ -6,3 +6,4 @@ composer.lock
 report
 .DS_Store
 testbench/
+.coverage/

@@ -63,8 +63,6 @@ class MySQLStorageTest extends TestCase
                 if (!$output[0]) {
                     $this->counter++;
                 }
-            })->catch(function (Exception $e) {
-                dump($e);
             });
         }
         $pool->wait();
@@ -160,8 +158,6 @@ class MySQLStorageTest extends TestCase
                 if (!$output[0]) {
                     $this->counter++;
                 }
-            })->catch(function (Exception $e) {
-                dump($e);
             });
         }
         $pool->wait();
