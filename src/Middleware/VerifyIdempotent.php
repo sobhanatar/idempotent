@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
+use Sobhanatar\Idempotent\IdempotentRequest;
 
 class VerifyIdempotent
 {
@@ -15,6 +16,12 @@ class VerifyIdempotent
     private Idempotent $idempotent;
 
     /**
+     * @var IdempotentRequest $idempotentRequest
+     */
+    private IdempotentRequest $idempotentRequest;
+
+    /**
+     * @param IdempotentRequest $idempotentRequest
      * @param Idempotent $idempotent
      */
     public function __construct(Idempotent $idempotent)
