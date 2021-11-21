@@ -4,11 +4,8 @@ namespace Sobhanatar\Idempotent;
 
 use Redis;
 use Exception;
-use Illuminate\Http\Request;
 use InvalidArgumentException;
-use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage, MysqlStorage};
 
 class Idempotent
@@ -16,61 +13,6 @@ class Idempotent
     use Signature;
 
     public const SEPARATOR = '_';
-
-    public const ROUTE_SEPARATOR = '.';
-
-    /**
-     * Get the entity's name from the route's name and then acquire its config
-     *
-     * @param Request $request
-     * @return array
-     * @throws InvalidArgumentException
-     * @throws Exception
-     */
-    public function resolveEntity(Request $request): array
-    {
-        $route = $request->route();
-        if (!$route instanceof Route) {
-            throw new Exception('Route is not defined');
-        }
-
-        $entity = str_replace(self::ROUTE_SEPARATOR, self::SEPARATOR, $route->getName());
-        $config = config(sprintf('idempotent.entities.%s', $entity));
-
-        return [$entity, $config];
-    }
-
-    /**
-     * Validate entity's requirement
-     *
-     * @param Request $request
-     * @param string $entity
-     * @param array|null $config
-     * @return void
-     */
-    public function validateEntity(Request $request, string $entity, ?array $config): void
-    {
-        if (!isset($config) || count($config) === 0) {
-            throw new InvalidArgumentException(sprintf('Entity `%s` does not exists or is empty', $entity));
-        }
-
-        if (strtoupper($request->method()) !== Request::METHOD_POST) {
-            throw new MethodNotAllowedException(
-                [Request::METHOD_POST],
-                sprintf('Route method is not POST, it is %s', $request->method())
-            );
-        }
-
-        if (!isset($config['fields'])) {
-            throw new InvalidArgumentException('entity\'s field is empty');
-        }
-
-        foreach ($config['fields'] as $field) {
-            if (!$request->input($field)) {
-                throw new InvalidArgumentException(sprintf('%s is in fields but not on request inputs', $field));
-            }
-        }
-    }
 
     /**
      * Get the required storage based on entity connection
