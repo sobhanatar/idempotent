@@ -72,8 +72,8 @@ return [
     | The structure is as follows:
     |
     | The key of each entity is the name of the route you want the middleware
-    | to act on. If you use "." notation on naming the routes, you should make
-    | sure to replace it with "_" for naming the entities. Make sure that if you
+    | to act on. If you use any notation other than "_", you should make sure
+    | to replace it with "_" for naming the entities. Make sure that if you
     | are using "mysql" storage on an entity, the name's length should not be
     | more than "64" characters.
     |
