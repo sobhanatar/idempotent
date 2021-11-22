@@ -5,12 +5,14 @@ namespace Sobhanatar\Idempotent\Tests;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Sobhanatar\Idempotent\Config;
 use Symfony\Component\Process\Process;
 use Illuminate\Contracts\Console\Kernel;
 
 trait TestHelper
 {
     protected Request $request;
+    protected Config $config;
 
     protected function seeInConsoleOutput($expectedText)
     {

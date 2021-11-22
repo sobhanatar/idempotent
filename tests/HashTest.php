@@ -3,7 +3,7 @@
 namespace Sobhanatar\Idempotent\Tests;
 
 use Illuminate\Support\Facades\DB;
-use Sobhanatar\Idempotent\Idempotent;
+use Sobhanatar\Idempotent\Signature;
 use Sobhanatar\Idempotent\Contracts\MysqlStorage;
 
 class HashTest extends TestCase
@@ -78,14 +78,5 @@ class HashTest extends TestCase
         $this->expectException(\ErrorException::class);
         $this->expectExceptionMessage(sprintf('hash(): Unknown hashing algorithm: %s', $wrongHashAlgorithm));
         $hash = hash($wrongHashAlgorithm, 'blah-blah-blah');
-    }
-
-    /**
-     * @test
-     */
-    public function assert_create_hash_returns_string(): void
-    {
-        $result = (new Idempotent())->hash('lorespam');
-        $this->assertEquals(true, is_string($result));
     }
 }

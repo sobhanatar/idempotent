@@ -9,6 +9,7 @@ use Sobhanatar\Idempotent\Config;
 use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
 use Sobhanatar\Idempotent\Middleware\VerifyIdempotent;
+use Sobhanatar\Idempotent\Signature;
 use Sobhanatar\Idempotent\Contracts\{Storage, RedisStorage};
 
 class VerifyIdempotentTest extends TestCase
@@ -23,7 +24,7 @@ class VerifyIdempotentTest extends TestCase
      */
     private Redis $redis;
 
-        /**
+    /**
      * @test
      * @throws JsonException
      */
@@ -42,7 +43,7 @@ class VerifyIdempotentTest extends TestCase
         $this->getRequest();
         $this->firstTimeVerify(Storage::MYSQL, 10);
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
             return [true, [
                 'result' => serialize(json_encode(['message' => 'Hi Im created'])),
                 'code' => Response::HTTP_CREATED
@@ -88,7 +89,7 @@ class VerifyIdempotentTest extends TestCase
         config()->set('idempotent.entities.news_post.storage', 'redis');
         config()->set('idempotent.entities.news_post.ttl', $ttl);
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function ($request) use ($ttl) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function ($request) use ($ttl) {
             sleep($ttl + 1);
             return response()->json(['message' => 'Hi Im created'], Response::HTTP_CREATED);
         });
@@ -108,7 +109,7 @@ class VerifyIdempotentTest extends TestCase
         $this->getRedisConnection();
         $this->firstTimeVerify(Storage::REDIS, 3);
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
             return [true, [
                 'status' => Storage::DONE,
                 'result' => serialize(json_encode(['message' => 'Hi Im created'])),
@@ -134,7 +135,8 @@ class VerifyIdempotentTest extends TestCase
             return (new Route(Request::METHOD_POST, $entity, []))->name($entity)->bind($this->request);
         });
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {});
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
+        });
         $this->assertEquals(
             json_encode(['message' => sprintf('Entity `%s` does not exists or is empty', $entity)], JSON_THROW_ON_ERROR),
             $response->getContent()
@@ -154,7 +156,7 @@ class VerifyIdempotentTest extends TestCase
             return (new Route(Request::METHOD_GET, $entity, []))->name($entity)->bind($this->request);
         });
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
         });
         $this->assertEquals(
             json_encode(['message' => sprintf('Route method is not POST, it is %s', $this->request->method())],
@@ -175,7 +177,7 @@ class VerifyIdempotentTest extends TestCase
         config()->set('idempotent.entities.news_post.ttl', 2);
         $this->request->headers->set('Accept', 'application/json');
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
             return response(['message' => 'Hi Im created'], Response::HTTP_CREATED);
         });
 
@@ -213,7 +215,7 @@ class VerifyIdempotentTest extends TestCase
             $this->loadMigrationsFrom(self::MIGRATION_PATH);
         }
 
-        $response = (new VerifyIdempotent(new Config(), new Idempotent()))->handle($this->request, function (Request $request) {
+        $response = (new VerifyIdempotent(new Config, new Signature, new Idempotent))->handle($this->request, function (Request $request) {
             return response()->json(['message' => 'Hi Im created'], Response::HTTP_CREATED);
         });
 
@@ -248,7 +250,5 @@ class VerifyIdempotentTest extends TestCase
             config('idempotent.redis.retryInterval'),
             config('idempotent.redis.readTimeout'),
         );
-
-        $this->service = new RedisStorage($this->redis);
     }
 }

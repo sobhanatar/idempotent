@@ -68,10 +68,10 @@ class Config
      * Get the entity's name from the route's name and then acquire its config
      *
      * @param Request $request
-     * @return void
+     * @return Config
      * @throws Exception
      */
-    public function resolveConfig(Request $request): void
+    public function resolveConfig(Request $request): Config
     {
         $this->setConfig(config('idempotent'));
 
@@ -96,5 +96,7 @@ class Config
                 throw new Exception(sprintf('%s is in fields but not on request inputs', $field));
             }
         }
+
+        return $this;
     }
 }

@@ -7,19 +7,23 @@ use Exception;
 use Illuminate\Http\Request;
 use Sobhanatar\Idempotent\Config;
 use Sobhanatar\Idempotent\Idempotent;
+use Sobhanatar\Idempotent\Signature;
 
 class IdempotentHeader
 {
     private Idempotent $idempotent;
     private Config $config;
+    private Signature $signature;
 
     /**
      * @param Config $config
+     * @param Signature $signature
      * @param Idempotent $idempotent
      */
-    public function __construct(Config $config, Idempotent $idempotent)
+    public function __construct(Config $config, Signature $signature, Idempotent $idempotent)
     {
         $this->config = $config;
+        $this->signature = $signature;
         $this->idempotent = $idempotent;
     }
 
@@ -34,18 +38,8 @@ class IdempotentHeader
     {
         try {
             $this->config->resolveConfig($request);
-            $service = $this->idempotent->resolveStorageService($this->config->getEntityConfig()['storage']);
-//            [$entity, $config] = $this->idempotent->resolveEntity($request);
-//            $this->idempotent->validateEntity($request, $entity, $config);
-//            $service = $this->idempotent->resolveStorageService($config['storage']);
-            $requestBag = [
-                'fields' => $request->all(),
-                'headers' => $request->headers->all(),
-                'servers' => $request->server->all()
-            ];
-            $signature = $this->idempotent->getSignature($requestBag, $this->config->getEntity(), $this->config->getEntityConfig());
-            $hash = $this->idempotent->hash($signature);
-            $request->headers->set(config('idempotent.header'), $hash);
+            $this->signature->makeSignature($request, $this->config)->hash();
+            $request->headers->set(config('idempotent.header'), $this->signature->getHash());
 
             return $next($request);
 
