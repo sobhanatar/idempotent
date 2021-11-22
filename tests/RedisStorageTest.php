@@ -16,11 +16,6 @@ class RedisStorageTest extends TestCase
     public int $counter = 0;
 
     /**
-     * @var Redis
-     */
-    public Redis $redis;
-
-    /**
      * @test
      */
     public function assert_redis_node_exists(): void
@@ -204,29 +199,5 @@ class RedisStorageTest extends TestCase
         $this->assertEquals($config['processes'], $this->counter);
         $this->assertTrue((bool)$this->redis->exists($config['keys'][0]));
         $this->redis->del($config['keys']);
-    }
-
-    /**
-     * Create redis instance and return the result
-     *
-     * @param array $config
-     * @return bool
-     */
-    private function getRedisConnection(array $config = []): bool
-    {
-        $this->redis = new Redis();
-        $auth = $config['password'] ?? config('idempotent.redis.password');
-        if ($auth) {
-            $this->redis->auth($auth);
-        }
-
-        return $this->redis->connect(
-            $config['host'] ?? config('idempotent.redis.host'),
-            $config['port'] ?? config('idempotent.redis.port'),
-            $config['timeout'] ?? config('idempotent.redis.timeout'),
-            $config['reserved'] ?? config('idempotent.redis.reserved'),
-            $config['retryInterval'] ?? config('idempotent.redis.retryInterval'),
-            $config['readTimeout'] ?? config('idempotent.redis.readTimeout'),
-        );
     }
 }

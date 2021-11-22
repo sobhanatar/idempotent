@@ -2,10 +2,11 @@
 
 namespace Sobhanatar\Idempotent\Tests;
 
-use Illuminate\Filesystem\Filesystem;
+use Redis;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Sobhanatar\Idempotent\Config;
+use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Illuminate\Contracts\Console\Kernel;
 
@@ -13,6 +14,7 @@ trait TestHelper
 {
     protected Request $request;
     protected Config $config;
+    protected Redis $redis;
 
     protected function seeInConsoleOutput($expectedText)
     {
@@ -70,7 +72,6 @@ trait TestHelper
         }
     }
 
-
     /**
      * Create an instance
      */
@@ -88,5 +89,29 @@ trait TestHelper
         $this->request->setRouteResolver(function () use ($uri, $routeMethod, $routeName) {
             return (new Route($routeMethod, $uri, []))->name($routeName)->bind($this->request);
         });
+    }
+
+    /**
+     * Create redis instance and return the result
+     *
+     * @param array $config
+     * @return bool
+     */
+    protected function getRedisConnection(array $config = []): bool
+    {
+        $this->redis = new Redis();
+        $auth = $config['password'] ?? config('idempotent.redis.password');
+        if ($auth) {
+            $this->redis->auth($auth);
+        }
+
+        return $this->redis->connect(
+            $config['host'] ?? config('idempotent.redis.host'),
+            $config['port'] ?? config('idempotent.redis.port'),
+            $config['timeout'] ?? config('idempotent.redis.timeout'),
+            $config['reserved'] ?? config('idempotent.redis.reserved'),
+            $config['retryInterval'] ?? config('idempotent.redis.retryInterval'),
+            $config['readTimeout'] ?? config('idempotent.redis.readTimeout'),
+        );
     }
 }
