@@ -40,30 +40,6 @@ class Idempotent
                 throw new InvalidArgumentException(sprintf('connection `%s` is not supported', $connection));
         }
     }
-//
-//    /**
-//     * Create Idempotent signature based on fields and headers
-//     *
-//     * @param array $requestBag
-//     * @param string $entity
-//     * @param array $config
-//     * @return string
-//     */
-//    public function getSignature(array $requestBag, string $entity, array $config): string
-//    {
-//        return $this->makeSignature($requestBag, $entity, $config);
-//    }
-//
-//    /**
-//     * Create hash from the request signature
-//     *
-//     * @param string $key
-//     * @return string
-//     */
-//    public function hash(string $key): string
-//    {
-//        return hash(config('idempotent.driver', 'sha256'), $key);
-//    }
 
     /**
      * Set data into shared memory
