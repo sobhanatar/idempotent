@@ -54,13 +54,13 @@ return [
     */
 
     'redis' => [
-        'host' => '127.0.0.1',
-        'port' => 6379,
-        'password' => null,
-        'timeout' => 0.0,
-        'reserved' => null,
-        'retryInterval' => 0,
-        'readTimeout' => 0.0,
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'port' => env('REDIS_PORT', 6379),
+        'password' => env('REDIS_PASSWORD', null),
+        'timeout' => env('REDIS_TIMEOUT', 0.0),
+        'reserved' => env('REDIS_RESERVED', null),
+        'retryInterval' => env('REDIS_RETRY_INTERVAL', 0),
+        'readTimeout' => env('REDIS_READ_TIMEOUT', 0.0),
     ],
 
     /*
@@ -72,10 +72,10 @@ return [
     | The structure is as follows:
     |
     | The key of each entity is the name of the route you want the middleware
-    | to act on. If you use any notation other that "_" on naming the routes,
-    | make sure to replace it with "_" for naming the entities. Besides, if you
-    | are using "mysql" as storage on an entity, the name's length should be
-    | equal or under "64" characters.
+    | to act on. If you use any notation other than "_", you should make sure
+    | to replace it with "_" for naming the entities. Make sure that if you
+    | are using "mysql" storage on an entity, the name's length should not be
+    | more than "64" characters.
     |
     | "storage", shows the storage you want to use for storing the idempotent
     | signature. Currently, available options are "mysql" and "redis".
