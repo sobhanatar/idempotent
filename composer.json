@@ -25,7 +25,8 @@
         "spatie/async": "^1.5"
     },
     "require-dev": {
-        "orchestra/testbench": "^6.23"
+        "orchestra/testbench": "^6.23",
+        "ext-redis": "*"
     },
     "scripts": {
         "test": "vendor/bin/phpunit"

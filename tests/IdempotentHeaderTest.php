@@ -5,7 +5,7 @@ namespace Sobhanatar\Idempotent\Tests;
 use JsonException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
-use Sobhanatar\Idempotent\{Idempotent, Signature};
+use Sobhanatar\Idempotent\{Config, Idempotent, Signature};
 use Sobhanatar\Idempotent\Middleware\IdempotentHeader;
 
 class IdempotentHeaderTest extends TestCase
@@ -29,7 +29,7 @@ class IdempotentHeaderTest extends TestCase
             return $route->bind($request);
         });
 
-        (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
+        (new IdempotentHeader(new Config(), new Idempotent()))->handle($request, function (Request $request) {
             $actualHash = $request->header(config('idempotent.header'));
             $expectedHash = hash(
                 config('idempotent.driver'),
@@ -37,25 +37,6 @@ class IdempotentHeaderTest extends TestCase
             );
             $this->assertEquals($expectedHash, $actualHash);
         });
-    }
-
-    /**
-     * @test
-     * @throws JsonException
-     */
-    public function assert_handle_throw_error_on_non_exist_route(): void
-    {
-        $request = new Request();
-        $request->setMethod(Request::METHOD_POST);
-        $request->merge(['title' => 'some-title', 'summary' => 'some-summary']);
-
-        $response = (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
-        });
-
-        $this->assertEquals(
-            $response->getContent(),
-            json_encode(['message' => 'Route is not defined'], JSON_THROW_ON_ERROR)
-        );
     }
 
     /**
@@ -72,7 +53,7 @@ class IdempotentHeaderTest extends TestCase
             return (new Route(Request::METHOD_POST, 'news_post', []))->name('news_posts')->bind($request);
         });
 
-        $response = (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
+        $response = (new IdempotentHeader(new Config(), new Idempotent()))->handle($request, function (Request $request) {
         });
 
         $this->assertEquals(
@@ -97,7 +78,7 @@ class IdempotentHeaderTest extends TestCase
             return (new Route(Request::METHOD_POST, 'news_post', []))->name('news_post')->bind($request);
         });
 
-        $response = (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
+        $response = (new IdempotentHeader(new Config(), new Idempotent()))->handle($request, function (Request $request) {
         });
 
         $this->assertEquals(
@@ -124,7 +105,7 @@ class IdempotentHeaderTest extends TestCase
         });
 
         config()->set('idempotent.entities.news_post.fields');
-        $response = (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
+        $response = (new IdempotentHeader(new Config(), new Idempotent()))->handle($request, function (Request $request) {
         });
 
         $this->assertEquals(
@@ -147,7 +128,7 @@ class IdempotentHeaderTest extends TestCase
             return (new Route(Request::METHOD_POST, 'news_post', []))->name('news_post')->bind($request);
         });
 
-        $response = (new IdempotentHeader(new Idempotent()))->handle($request, function (Request $request) {
+        $response = (new IdempotentHeader(new Config(), new Idempotent()))->handle($request, function (Request $request) {
         });
 
         $this->assertEquals(
