@@ -54,13 +54,13 @@ return [
     */
 
     'redis' => [
-        'host' => '127.0.0.1',
-        'port' => 6379,
-        'password' => null,
-        'timeout' => 0.0,
-        'reserved' => null,
-        'retryInterval' => 0,
-        'readTimeout' => 0.0,
+        'host' => env('REDIS_HOST', '127.0.0.1'),
+        'port' => env('REDIS_PORT', 6379),
+        'password' => env('REDIS_PASSWORD', null),
+        'timeout' => env('REDIS_TIMEOUT', 0.0),
+        'reserved' => env('REDIS_RESERVED', null),
+        'retryInterval' => env('REDIS_RETRY_INTERVAL', 0),
+        'readTimeout' => env('REDIS_READ_TIMEOUT', 0.0),
     ],
 
     /*
