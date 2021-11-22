@@ -1,0 +1,41 @@
+version: '3'
+
+volumes:
+  redis_data:
+    driver: local
+
+  mysql_data:
+    driver: local
+
+services:
+  idempotent_redis:
+    container_name: idempotent_redis
+    image: dockerhub.ir/redis:latest
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "8586:6379"
+
+  idempotent_mysql:
+    container_name: idempotent_mysql
+    build:
+      context: ./docker/mysql
+      dockerfile: Dockerfile
+      args:
+        - UID=${APP_UID}
+        - GID=${APP_GID}
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/config.ini:/etc/mysql/conf.d/config.ini
+    ports:
+      - "8585:3306"
+
+networks:
+  default:
+    external:
+      name: idempotent_network
