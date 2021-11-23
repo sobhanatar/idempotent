@@ -4,27 +4,25 @@ namespace Sobhanatar\Idempotent\Middleware;
 
 use Closure;
 use Exception;
-use Sobhanatar\Idempotent\Config;
-use Sobhanatar\Idempotent\Signature;
-use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Http\{Request, Response};
+use Sobhanatar\Idempotent\{Config, Signature, StorageService};
 
 class VerifyIdempotent
 {
-    private Idempotent $idempotent;
     private Config $config;
     private Signature $signature;
+    private StorageService $storageService;
 
     /**
      * @param Config $config
      * @param Signature $signature
-     * @param Idempotent $idempotent
+     * @param StorageService $storageService
      */
-    public function __construct(Config $config, Signature $signature, Idempotent $idempotent)
+    public function __construct(Config $config, Signature $signature, StorageService $storageService)
     {
         $this->config = $config;
         $this->signature = $signature;
-        $this->idempotent = $idempotent;
+        $this->storageService = $storageService;
     }
 
     /**
@@ -38,30 +36,35 @@ class VerifyIdempotent
     {
         try {
             $this->config->resolveConfig($request);
-            $service = $this->idempotent->resolveStorageService($this->config->getEntityConfig()['storage']);
             $this->signature->makeSignature($request, $this->config)->hash();
 
-//            $signature = $this->idempotent->getSignature($requestBag, $this->config->getEntity(), $this->config->getEntityConfig());
-//            $hash = $this->idempotent->hash($signature);
-
-            [$exists, $result] = $this->idempotent->verify(
-                $service,
-                $this->config->getEntity(),
-                $this->config->getEntityConfig(),
-                $this->signature->getHash()
-            );
-            if ($exists) {
-                $response = $this->idempotent->prepareResponse($this->config->getEntity(), $result['response']);
-                return $this->response($request, $response, (int)$result['code']);
+            $storage = $this->storageService
+                ->resolveStrategy($this->config)
+                ->verify($this->config->getEntity(), $this->config->getEntityConfig(), $this->signature->getHash());
+            if ($this->storageService->exists()) {
+                $response = $this->prepareResponse($this->config->getEntity(), $this->storageService->getResponse()['response']);
+                return $this->response($request, $response, (int)$this->storageService->getResponse()['code']);
             }
 
             $response = $next($request);
-            $this->idempotent->update($service, $response, $this->config->getEntity(), $this->signature->getHash());
+            $storage->update($response, $this->config->getEntity(), $this->signature->getHash());
             return $this->response($request, $response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
             return response(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Prepare response
+     *
+     * @param string $entity
+     * @param string|null $response
+     * @return string
+     */
+    public function prepareResponse(string $entity, ?string $response): string
+    {
+        return unserialize($response) ?? trans('idempotent.' . $entity);
     }
 
     /**

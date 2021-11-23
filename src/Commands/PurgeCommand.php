@@ -5,8 +5,8 @@ namespace Sobhanatar\Idempotent\Commands;
 use Exception;
 use InvalidArgumentException;
 use Illuminate\Console\Command;
-use Sobhanatar\Idempotent\Contracts\Storage;
 use Illuminate\Support\Facades\{DB, Schema};
+use Sobhanatar\Idempotent\StorageService as Storage;
 use Sobhanatar\Idempotent\Exceptions\TableNotFoundException;
 
 class PurgeCommand extends Command

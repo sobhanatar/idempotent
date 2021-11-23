@@ -76,7 +76,7 @@ trait TestHelper
      * Create an instance
      */
     protected function getRequest(
-        $body,
+        $body = ['title' => 'title', 'summary' => 'summary'],
         $requestMethod = Request::METHOD_POST,
         $routeMethod = Request::METHOD_POST,
         $uri = 'news_post',

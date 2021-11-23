@@ -3,7 +3,7 @@
 namespace Sobhanatar\Idempotent\Tests;
 
 use Sobhanatar\Idempotent\Models\Idempotent;
-use Sobhanatar\Idempotent\Contracts\Storage;
+use Sobhanatar\Idempotent\StorageService as Storage;
 
 
 class PurgeCommandTest extends TestCase
@@ -28,9 +28,8 @@ class PurgeCommandTest extends TestCase
     public function assert_entity_should_use_mysql_as_connection(): void
     {
         config()->set('idempotent.entities.news_post.storage', Storage::REDIS);
-        $this
-            ->artisan('idempotent:purge --entity=news_post')
-            ->expectsOutput("The entity storage is not database");
+        $this->artisan('idempotent:purge --entity=news_post')
+            ->expectsOutput('The entity storage is not database');
     }
 
     /**

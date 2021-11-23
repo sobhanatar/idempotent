@@ -3,10 +3,11 @@
 namespace Sobhanatar\Idempotent\Tests;
 
 use Exception;
+use PDO;
 use Spatie\Async\Pool;
-use Sobhanatar\Idempotent\Idempotent;
 use Illuminate\Support\Facades\{DB, Schema};
-use Sobhanatar\Idempotent\Contracts\{Storage, MysqlStorage};
+use Sobhanatar\Idempotent\Storage\MysqlStorage;
+use Sobhanatar\Idempotent\StorageService as Storage;
 
 class MySQLStorageTest extends TestCase
 {
@@ -51,13 +52,13 @@ class MySQLStorageTest extends TestCase
         $pool = Pool::create();
         for (; $i < $config['processes']; $i++) {
             $pool->add(function () use ($config) {
-                $pdo = new \PDO(
+                $pdo = new PDO(
                     sprintf('mysql:host=%s;port=%d;dbname=%s', $config['host'], $config['port'], $config['db']),
                     $config['user'],
                     $config['password']
                 );
                 $service = new MysqlStorage($pdo, $config['table']);
-                return (new Idempotent())->verify($service, 'request', $config, 'some hash');
+                return $service->verify('request', $config, 'some hash');
 
             })->then(function ($output) {
                 if (!$output[0]) {
@@ -66,6 +67,7 @@ class MySQLStorageTest extends TestCase
             });
         }
         $pool->wait();
+
         $this->assertEquals(1, $this->counter);
         $this->assertEquals($config['processes'], $i);
         $this->assertDatabaseHas(
@@ -92,7 +94,7 @@ class MySQLStorageTest extends TestCase
         ];
         $this->loadMigrationsFrom(self::MIGRATION_PATH);
         $service = new MysqlStorage(DB::connection('mysql')->getPDO(), $config['table']);
-        $res = (new Idempotent())->verify($service, 'request', $config, 'some hash');
+        $res = $service->verify('request', $config, 'some hash');
 
         $this->assertFalse($res[0]);
         $this->assertDatabaseHas(
@@ -106,7 +108,7 @@ class MySQLStorageTest extends TestCase
         $this->assertDatabaseCount($config['table'], 1, 'mysql');
         sleep($config['ttl'] + 1);
 
-        $res = (new Idempotent())->verify($service, 'request', $config, 'some hash');
+        $res = $service->verify('request', $config, 'some hash');
 
         $this->assertFalse($res[0]);
         $this->assertDatabaseHas(
@@ -146,13 +148,13 @@ class MySQLStorageTest extends TestCase
         $pool = Pool::create();
         for ($i = 0; $i < $config['processes']; $i++) {
             $pool->add(function () use ($i, $config) {
-                $pdo = new \PDO(
+                $pdo = new PDO(
                     sprintf('mysql:host=%s;port=%d;dbname=%s', $config['host'], $config['port'], $config['db']),
                     $config['user'],
                     $config['password']
                 );
                 $service = new MysqlStorage($pdo, $config['table']);
-                return (new Idempotent())->verify($service, $config['entities'][$i], $config, 'some hash');
+                return $service->verify($config['entities'][$i], $config, 'some hash');
 
             })->then(function ($output) {
                 if (!$output[0]) {

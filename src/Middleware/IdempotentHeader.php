@@ -5,26 +5,21 @@ namespace Sobhanatar\Idempotent\Middleware;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
-use Sobhanatar\Idempotent\Config;
-use Sobhanatar\Idempotent\Idempotent;
-use Sobhanatar\Idempotent\Signature;
+use Sobhanatar\Idempotent\{Config, Signature};
 
 class IdempotentHeader
 {
-    private Idempotent $idempotent;
     private Config $config;
     private Signature $signature;
 
     /**
      * @param Config $config
      * @param Signature $signature
-     * @param Idempotent $idempotent
      */
-    public function __construct(Config $config, Signature $signature, Idempotent $idempotent)
+    public function __construct(Config $config, Signature $signature)
     {
         $this->config = $config;
         $this->signature = $signature;
-        $this->idempotent = $idempotent;
     }
 
     /**

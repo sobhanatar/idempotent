@@ -4,13 +4,12 @@ namespace Sobhanatar\Idempotent;
 
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Symfony\Component\HttpFoundation\Request as SfRequest;
 
 class Config
 {
-    public const SEPARATOR = '_';
-    public const ROUTE_SEPARATOR = '.';
+    private const SEPARATOR = '_';
+    private const ROUTE_SEPARATOR = '.';
 
     private array $config;
     private string $entity;
@@ -54,6 +53,46 @@ class Config
     public function getEntityConfig(): array
     {
         return $this->entityConfig;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorage(): string
+    {
+        return $this->entityConfig['storage'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimeout(): string
+    {
+        return $this->entityConfig['timeout'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return $this->config['table'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getRedis(): array
+    {
+        return $this->config['redis'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getTtl(): int
+    {
+        return (int)$this->entityConfig['ttl'];
     }
 
     /**

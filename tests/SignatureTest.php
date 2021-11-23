@@ -2,6 +2,7 @@
 
 namespace Sobhanatar\Idempotent\Tests;
 
+use Exception;
 use Sobhanatar\Idempotent\Config;
 use Sobhanatar\Idempotent\Signature;
 
@@ -9,11 +10,11 @@ class SignatureTest extends TestCase
 {
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->config = (new Config())->resolveConfig($this->request);
         $signatureObj = (new Signature())->makeSignature($this->request, $this->config);
 
@@ -24,17 +25,17 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
     }
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_with_header(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->headers->set('Host', '127.0.0.1');
         $this->request->headers->set('User-Agent', 'test');
 
@@ -49,19 +50,19 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('test', $signature);
     }
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_with_servers(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
 
         config()->set('idempotent.entities.news_post.servers', ['REMOTE_ADDR']);
@@ -75,18 +76,18 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.2', $signature);
     }
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_with_headers_and_servers(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->headers->set('Host', '127.0.0.1');
         $this->request->headers->set('User-Agent', 'test');
         $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
@@ -103,8 +104,8 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('test', $signature);
         $this->assertContains('127.0.0.2', $signature);
@@ -112,11 +113,11 @@ class SignatureTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_with_multiple_values_in_headers_servers(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->headers->set('Host', ['127.0.0.1', '10.0.0.1']);
         $this->request->server->set('REMOTE_ADDR', ['127.0.0.2', '10.0.0.2']);
 
@@ -132,8 +133,8 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('10.0.0.1', $signature);
         $this->assertContains('127.0.0.2', $signature);
@@ -142,11 +143,11 @@ class SignatureTest extends TestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_works_with_mix_lowercase_uppercase_headers_servers_params(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->headers->set('HOst', '127.0.0.1');
         $this->request->server->set('ReMOTe_addR', '127.0.0.2');
 
@@ -162,19 +163,19 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('127.0.0.2', $signature);
     }
 
     /**
      * @test
-     * @throws \Exception
+     * @throws Exception
      */
     public function assert_make_signature_works_with_non_existing_key_header(): void
     {
-        $this->getRequest(['title' => 'idempotent', 'summary' => 'package']);
+        $this->getRequest();
         $this->request->headers->set('host', '127.0.0.1');
         $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
 
@@ -190,7 +191,7 @@ class SignatureTest extends TestCase
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
         $this->assertContains('post', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
     }
 }

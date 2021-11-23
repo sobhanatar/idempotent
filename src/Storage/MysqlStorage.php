@@ -1,9 +1,10 @@
 <?php
 
-namespace Sobhanatar\Idempotent\Contracts;
+namespace Sobhanatar\Idempotent\Storage;
 
 use PDO;
 use malkusch\lock\mutex\MySQLMutex;
+use Sobhanatar\Idempotent\StorageService;
 use Symfony\Component\HttpFoundation\Response;
 
 class MysqlStorage implements Storage
@@ -60,7 +61,9 @@ class MysqlStorage implements Storage
         $code = $response->getStatusCode();
         $data = [
             'response' => serialize($response->getContent()),
-            'status' => $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED ? Storage::DONE : Storage::FAIL,
+            'status' => $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED
+                ? StorageService::DONE
+                : StorageService::FAIL,
             'code' => $code,
             'entity' => $entity,
             'hash' => $hash,
@@ -89,11 +92,11 @@ class MysqlStorage implements Storage
         );
 
         $result = $this->pdo->query($sql)->fetch();
-        if (isset($result['id']) && $result['id'] > 0) {
+        if (isset($result['id'])) {
             return [true, $result];
         }
 
-        return [false, null];
+        return [false, []];
     }
 
     /**
@@ -114,7 +117,7 @@ class MysqlStorage implements Storage
         $this->pdo->prepare($sql)->execute([
             'entity' => $entity,
             'hash' => $hash,
-            'status' => 'progress',
+            'status' => StorageService::PROGRESS,
             'expired_ut' => $now->unix() + $ttl,
             'created_ut' => $now->unix(),
             'created_at' => $now->format('Y-m-d H:i:s'),
@@ -122,6 +125,6 @@ class MysqlStorage implements Storage
             'updated_at' => $now->format('Y-m-d H:i:s'),
         ]);
 
-        return [false, null];
+        return [false, []];
     }
 }
