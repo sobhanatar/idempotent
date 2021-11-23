@@ -5,21 +5,21 @@ namespace Sobhanatar\Idempotent\Middleware;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
-use Sobhanatar\Idempotent\Idempotent;
+use Sobhanatar\Idempotent\{Config, Signature};
 
 class IdempotentHeader
 {
-    /**
-     * @var Idempotent $idempotent
-     */
-    private Idempotent $idempotent;
+    private Config $config;
+    private Signature $signature;
 
     /**
-     * @param Idempotent $idempotent
+     * @param Config $config
+     * @param Signature $signature
      */
-    public function __construct(Idempotent $idempotent)
+    public function __construct(Config $config, Signature $signature)
     {
-        $this->idempotent = $idempotent;
+        $this->config = $config;
+        $this->signature = $signature;
     }
 
     /**
@@ -32,16 +32,9 @@ class IdempotentHeader
     public function handle(Request $request, Closure $next)
     {
         try {
-            [$entity, $config] = $this->idempotent->resolveEntity($request);
-            $this->idempotent->validateEntity($request, $entity, $config);
-            $requestBag = [
-                'fields' => $request->all(),
-                'headers' => $request->headers->all(),
-                'servers' => $request->server->all()
-            ];
-            $signature = $this->idempotent->getSignature($requestBag, $entity, $config);
-            $hash = $this->idempotent->hash($signature);
-            $request->headers->set(config('idempotent.header'), $hash);
+            $this->config->resolveConfig($request);
+            $this->signature->makeSignature($request, $this->config)->hash();
+            $request->headers->set(config('idempotent.header'), $this->signature->getHash());
 
             return $next($request);
 

@@ -2,97 +2,110 @@
 
 namespace Sobhanatar\Idempotent\Tests;
 
-use Sobhanatar\Idempotent\Idempotent;
+use Exception;
+use Sobhanatar\Idempotent\Config;
+use Sobhanatar\Idempotent\Signature;
 
 class SignatureTest extends TestCase
 {
-    private array $requestBag = [
-        'fields' => ['name' => 'idempotent', 'surname' => 'package'],
-        'headers' => ['host' => '127.0.0.1', 'user-agent' => 'test'],
-        'servers' => ['REMOTE_ADDR' => '127.0.0.2'],
-    ];
-
-    private string $entity = 'news';
-
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature(): void
     {
-        $config = [
-            'fields' => ['name', 'surname']
-        ];
+        $this->getRequest();
+        $this->config = (new Config())->resolveConfig($this->request);
+        $signatureObj = (new Signature())->makeSignature($this->request, $this->config);
 
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $this->assertIsString($signature);
+        $this->assertIsString($signatureObj->getSignature());
 
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signatureObj->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature_with_header(): void
     {
-        $config = [
-            'fields' => ['name', 'surname'],
-            'headers' => ['Host', 'User-Agent']
-        ];
+        $this->getRequest();
+        $this->request->headers->set('Host', '127.0.0.1');
+        $this->request->headers->set('User-Agent', 'test');
 
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        config()->set('idempotent.entities.news_post.headers', ['host', 'user-agent']);
+        $this->config = (new Config())->resolveConfig($this->request);
+
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
+
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('test', $signature);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature_with_servers(): void
     {
-        $config = [
-            'fields' => ['name', 'surname'],
-            'servers' => ['REMOTE_ADDR']
-        ];
+        $this->getRequest();
+        $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
 
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        config()->set('idempotent.entities.news_post.servers', ['REMOTE_ADDR']);
+        $this->config = (new Config())->resolveConfig($this->request);
+
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
+
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.2', $signature);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature_with_headers_and_servers(): void
     {
-        $config = [
-            'fields' => ['name', 'surname'],
-            'headers' => ['Host', 'User-Agent'],
-            'servers' => ['REMOTE_ADDR']
-        ];
+        $this->getRequest();
+        $this->request->headers->set('Host', '127.0.0.1');
+        $this->request->headers->set('User-Agent', 'test');
+        $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
 
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        config()->set('idempotent.entities.news_post.headers', ['host', 'user-agent']);
+        config()->set('idempotent.entities.news_post.servers', ['REMOTE_ADDR']);
+        $this->config = (new Config())->resolveConfig($this->request);
+
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
+
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('test', $signature);
         $this->assertContains('127.0.0.2', $signature);
@@ -100,122 +113,85 @@ class SignatureTest extends TestCase
 
     /**
      * @test
+     * @throws Exception
      */
-    public function assert_make_signature_with_multiple_values_in_headers(): void
+    public function assert_make_signature_with_multiple_values_in_headers_servers(): void
     {
-        $requestBag = [
-            'fields' => ['name' => 'idempotent', 'surname' => 'package'],
-            'headers' => ['Host' => ['127.0.0.1', '10.0.0.1']],
-            'servers' => ['REMOTE_ADDR' => '127.0.0.2'],
-        ];
+        $this->getRequest();
+        $this->request->headers->set('Host', ['127.0.0.1', '10.0.0.1']);
+        $this->request->server->set('REMOTE_ADDR', ['127.0.0.2', '10.0.0.2']);
 
-        $config = [
-            'fields' => ['name', 'surname'],
-            'headers' => ['Host', 'User-Agent'],
-        ];
+        config()->set('idempotent.entities.news_post.headers', ['host', 'user-agent']);
+        config()->set('idempotent.entities.news_post.servers', ['REMOTE_ADDR']);
+        $this->config = (new Config())->resolveConfig($this->request);
 
-        $signature = (new Idempotent())->getSignature($requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
+
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
         $this->assertContains('10.0.0.1', $signature);
-    }
-
-    /**
-     * @test
-     */
-    public function assert_make_signature_with_multiple_values_in_server(): void
-    {
-        $requestBag = [
-            'fields' => ['name' => 'idempotent', 'surname' => 'package'],
-            'headers' => ['Host' => '127.0.0.1'],
-            'servers' => ['REMOTE_ADDR' => ['127.0.0.2', '10.0.0.2']],
-        ];
-
-        $config = [
-            'fields' => ['name', 'surname'],
-            'servers' => ['REMOTE_ADDR'],
-        ];
-
-        $signature = (new Idempotent())->getSignature($requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
-
-        $this->assertIsArray($signature);
-        $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
         $this->assertContains('127.0.0.2', $signature);
         $this->assertContains('10.0.0.2', $signature);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature_works_with_mix_lowercase_uppercase_headers_servers_params(): void
     {
-        $requestBag = [
-            'fields' => ['name' => 'idempotent', 'surname' => 'package'],
-            'headers' => ['HOst' => '127.0.0.1', 'usER-agENt' => 'test'],
-            'servers' => ['ReMOTe_addR' => '127.0.0.2'],
-        ];
+        $this->getRequest();
+        $this->request->headers->set('HOst', '127.0.0.1');
+        $this->request->server->set('ReMOTe_addR', '127.0.0.2');
 
-        $config = [
-            'fields' => ['name', 'surname'],
-            'headers' => ['hoST', 'USer-AgENt'],
-            'servers' => ['rEMoTE_AddR']
-        ];
+        config()->set('idempotent.entities.news_post.headers', ['hoST']);
+        config()->set('idempotent.entities.news_post.servers', ['rEMoTE_AddR']);
+        $this->config = (new Config())->resolveConfig($this->request);
 
-        $signature = (new Idempotent())->getSignature($requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
+
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
         $this->assertContains('127.0.0.1', $signature);
-        $this->assertContains('test', $signature);
         $this->assertContains('127.0.0.2', $signature);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_make_signature_works_with_non_existing_key_header(): void
     {
-        $config = [
-            'fields' => ['name', 'surname'],
-            'headers' => ['non-existing-header-key'],
-        ];
+        $this->getRequest();
+        $this->request->headers->set('host', '127.0.0.1');
+        $this->request->server->set('REMOTE_ADDR', '127.0.0.2');
 
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        config()->set('idempotent.entities.news_post.headers', ['non-existing-header-key']);
+        config()->set('idempotent.entities.news_post.servers', ['non-existing-server-key']);
+        $this->config = (new Config())->resolveConfig($this->request);
 
-        $this->assertIsArray($signature);
-        $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
-    }
+        $signature = (new Signature())->makeSignature($this->request, $this->config);
+        $this->assertIsString($signature->getSignature());
 
-    /**
-     * @test
-     */
-    public function assert_make_signature_works_with_non_existing_key_servers(): void
-    {
-        $config = [
-            'fields' => ['name', 'surname'],
-            'servers' => ['non-existing-server-key'],
-        ];
-
-        $signature = (new Idempotent())->getSignature($this->requestBag, $this->entity, $config);
-        $signature = explode(Idempotent::SEPARATOR, $signature);
+        $signature = explode(Signature::SIGNATURE_SEPARATOR, $signature->getSignature());
 
         $this->assertIsArray($signature);
         $this->assertContains('news', $signature);
-        $this->assertContains('idempotent', $signature);
-        $this->assertContains('package', $signature);
+        $this->assertContains('post', $signature);
+        $this->assertContains('title', $signature);
+        $this->assertContains('summary', $signature);
     }
 }

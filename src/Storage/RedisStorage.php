@@ -1,16 +1,14 @@
 <?php
 
-namespace Sobhanatar\Idempotent\Contracts;
+namespace Sobhanatar\Idempotent\Storage;
 
 use Redis;
 use malkusch\lock\mutex\PHPRedisMutex;
+use Sobhanatar\Idempotent\StorageService;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedisStorage implements Storage
 {
-    /**
-     * @var Redis $redis
-     */
     private Redis $redis;
 
     /**
@@ -34,12 +32,9 @@ class RedisStorage implements Storage
                 return [true, json_decode($result, true, 512, JSON_THROW_ON_ERROR)];
             }
 
-            $this->redis->set(
-                $key,
-                json_encode(['status' => 'progress', 'response' => ''], JSON_THROW_ON_ERROR),
-                $config['ttl']
-            );
-            return [false, null];
+            $value = json_encode(['status' => 'progress', 'response' => ''], JSON_THROW_ON_ERROR);
+            $this->redis->set($key, $value, $config['ttl']);
+            return [false, []];
         });
     }
 
@@ -57,10 +52,13 @@ class RedisStorage implements Storage
             }
 
             $code = $response->getStatusCode();
-            $status = $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED ? Storage::DONE : Storage::FAIL;
+            $status = $code >= Response::HTTP_OK && $code <= Response::HTTP_IM_USED
+                ? StorageService::DONE
+                : StorageService::FAIL;
 
             $data = ['status' => $status, 'response' => serialize($response->getContent()), 'code' => $code];
-            $this->redis->set($key, json_encode($data, JSON_THROW_ON_ERROR), $this->redis->rawCommand("TTL", $key));
+            $value = json_encode($data, JSON_THROW_ON_ERROR);
+            $this->redis->set($key, $value, $this->redis->rawCommand("TTL", $key));
         });
     }
 

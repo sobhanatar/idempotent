@@ -2,55 +2,70 @@
 
 namespace Sobhanatar\Idempotent\Tests;
 
-use Sobhanatar\Idempotent\{Contracts\MysqlStorage, Contracts\RedisStorage, Idempotent};
+use Exception;
+use RedisException;
+use Sobhanatar\Idempotent\{Config, StorageService};
+use Sobhanatar\Idempotent\storage\{MysqlStorage, RedisStorage};
 
 class StorageServiceTest extends TestCase
 {
     /**
      * @test
+     * @throws Exception
      */
     public function assert_storage_with_no_valid_connection_return_error(): void
     {
         $connection = 'invalid';
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage(sprintf('connection `%s` is not supported', $connection));
 
-        (new Idempotent())->resolveStorageService($connection);
-        $this->assertTrue(true);
+        $this->getRequest();
+        config()->set('idempotent.entities.news_post.storage', $connection);
+        $this->config = (new Config())->resolveConfig($this->request);
+        (new StorageService())->resolveStrategy($this->config);
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_storage_with_redis_connection(): void
     {
-        $connection = 'redis';
-        $service = (new Idempotent())->resolveStorageService($connection);
+        $this->getRequest();
+        config()->set('idempotent.entities.news_post.storage', StorageService::REDIS);
+        $this->config = (new Config())->resolveConfig($this->request);
+        $service = (new StorageService())->resolveStrategy($this->config);
 
-        $this->assertInstanceOf(RedisStorage::class, $service);
+        $this->assertInstanceOf(RedisStorage::class, $service->getStrategy());
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_storage_with_mysql_connection(): void
     {
-        $connection = 'mysql';
-        $service = (new Idempotent())->resolveStorageService($connection);
+        $this->getRequest();
+        config()->set('idempotent.entities.news_post.storage', StorageService::MYSQL);
+        $this->config = (new Config())->resolveConfig($this->request);
+        $service = (new StorageService())->resolveStrategy($this->config);
 
-        $this->assertInstanceOf(MysqlStorage::class, $service);
+        $this->assertInstanceOf(MysqlStorage::class, $service->getStrategy());
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function assert_storage_with_redis_connection_throw_exception_with_wrong_password(): void
     {
-        $connection = 'redis';
-        config()->set('idempotent.redis.password', 'incorrect-password');
-        $this->expectException(\RedisException::class);
+        $this->expectException(RedisException::class);
         $this->expectExceptionMessage("Redis server went away");
 
-        (new Idempotent())->resolveStorageService($connection);
+        $this->getRequest();
+        config()->set('idempotent.entities.news_post.storage', StorageService::REDIS);
+        config()->set('idempotent.redis.password', 'incorrect-password');
+        $this->config = (new Config())->resolveConfig($this->request);
+        (new StorageService())->resolveStrategy($this->config);
     }
 }

@@ -2,28 +2,76 @@
 
 namespace Sobhanatar\Idempotent;
 
-trait Signature
+use Illuminate\Http\Request;
+
+class Signature
 {
-    public string $signatureSeparator = '_';
+    public const SIGNATURE_SEPARATOR = '_';
+
+    private string $signature;
+    private string $hash;
 
     /**
-     * Create Idempotent signature based on fields and headers
-     *
-     * @param array $requestBag
-     * @param string $entity
-     * @param array $config
+     * @param string $signature
+     */
+    public function setSignature(string $signature): void
+    {
+        $this->signature = $signature;
+    }
+
+    /**
      * @return string
      */
-    public function makeSignature(array $requestBag, string $entity, array $config): string
+    public function getSignature(): string
+    {
+        return $this->signature;
+    }
+
+    /**
+     * @param string $hash
+     */
+    public function setHash(string $hash): void
+    {
+        $this->hash = $hash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash(): string
+    {
+        return $this->hash;
+    }
+
+    /**
+     * Create Idempotent signature
+     *
+     * @param Request $request
+     * @param Config $config
+     * @return Signature
+     */
+    public function makeSignature(Request $request, Config $config): Signature
     {
         $signature = array_merge(
-            [$entity],
-            $this->getFieldsFromRequest($requestBag['fields'], $config['fields']),
-            $this->getHeadersFromRequest($requestBag['headers'], $config['headers'] ?? []),
-            $this->getServerFromRequest($requestBag['servers'], $config['servers'] ?? []),
+            [$config->getEntity()],
+            $this->prepareFields($request->all() ?? [], $config->getEntityConfig()['fields']),
+            $this->prepareHeaders($request->headers->all() ?? [], $config->getEntityConfig()['headers'] ?? []),
+            $this->prepareServers($request->server->all() ?? [], $config->getEntityConfig()['servers'] ?? []),
         );
 
-        return implode($this->signatureSeparator, $signature);
+        $this->setSignature(implode(self::SIGNATURE_SEPARATOR, $signature));
+        return $this;
+    }
+
+    /**
+     * Create hash from the signature
+     *
+     * @return Signature
+     */
+    public function hash(): Signature
+    {
+        $this->setHash(hash(config('idempotent.driver', 'sha256'), $this->getSignature()));
+        return $this;
     }
 
     /**
@@ -33,7 +81,7 @@ trait Signature
      * @param array $configFields
      * @return array
      */
-    protected function getFieldsFromRequest(array $requestFields, array $configFields): array
+    protected function prepareFields(array $requestFields, array $configFields): array
     {
         $fields = [];
         foreach ($configFields as $field) {
@@ -50,7 +98,7 @@ trait Signature
      * @param array $configHeaders
      * @return array
      */
-    protected function getHeadersFromRequest(array $requestHeaders, array $configHeaders): array
+    protected function prepareHeaders(array $requestHeaders, array $configHeaders): array
     {
         if (!count($configHeaders)) {
             return [];
@@ -85,7 +133,7 @@ trait Signature
      * @param array $configServers
      * @return array
      */
-    protected function getServerFromRequest(array $requestServers, array $configServers): array
+    protected function prepareServers(array $requestServers, array $configServers): array
     {
         if (!count($configServers)) {
             return [];

@@ -5,8 +5,8 @@ namespace Sobhanatar\Idempotent\Tests;
 use Redis;
 use Exception;
 use Spatie\Async\Pool;
-use Sobhanatar\Idempotent\Idempotent;
-use Sobhanatar\Idempotent\Contracts\{RedisStorage, Storage};
+use Sobhanatar\Idempotent\Storage\RedisStorage;
+use Sobhanatar\Idempotent\StorageService as Storage;
 
 class RedisStorageTest extends TestCase
 {
@@ -14,11 +14,6 @@ class RedisStorageTest extends TestCase
      * @var int
      */
     public int $counter = 0;
-
-    /**
-     * @var Redis
-     */
-    public Redis $redis;
 
     /**
      * @test
@@ -67,9 +62,6 @@ class RedisStorageTest extends TestCase
         for (; $i < $config['processes']; $i++) {
             $pool->add(function () use ($config) {
                 $redis = new Redis();
-                if ($config['password']) {
-                    $redis->auth($config['password']);
-                }
                 $redis->connect(
                     $config['host'],
                     $config['port'],
@@ -78,9 +70,8 @@ class RedisStorageTest extends TestCase
                     $config['retryInterval'],
                     $config['readTimeout'],
                 );
-
                 $service = new RedisStorage($redis);
-                return (new Idempotent())->verify($service, $config['entity'], $config, $config['hash']);
+                return $service->verify($config['entity'], $config, $config['hash']);
 
             })->then(function ($output) {
                 if (!$output[0]) {
@@ -126,7 +117,7 @@ class RedisStorageTest extends TestCase
         $this->redis->del($key);
 
         $service = new RedisStorage($this->redis);
-        $result = (new Idempotent())->verify($service, $config['entity'], $config, $config['hash']);
+        $result = $service->verify($config['entity'], $config, $config['hash']);
         $resArray = json_decode($this->redis->get($key), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertFalse($result[0]);
@@ -135,7 +126,7 @@ class RedisStorageTest extends TestCase
         $this->assertEquals(Storage::PROGRESS, $resArray['status']);
         sleep($config['ttl'] + 1);
 
-        $result = (new Idempotent())->verify($service, $config['entity'], $config, $config['hash']);
+        $result = $service->verify($config['entity'], $config, $config['hash']);
         $resArray = json_decode($this->redis->get($key), true, 512, JSON_THROW_ON_ERROR);
 
         $this->assertFalse($result[0]);
@@ -178,9 +169,6 @@ class RedisStorageTest extends TestCase
         for ($i = 0; $i < $config['processes']; $i++) {
             $pool->add(function () use ($i, $config) {
                 $redis = new Redis();
-                if ($config['password']) {
-                    $redis->auth($config['password']);
-                }
                 $redis->connect(
                     $config['host'],
                     $config['port'],
@@ -189,9 +177,8 @@ class RedisStorageTest extends TestCase
                     $config['retryInterval'],
                     $config['readTimeout'],
                 );
-
                 $service = new RedisStorage($redis);
-                return (new Idempotent())->verify($service, $config['entities'][$i], $config, $config['hash']);
+                return $service->verify($config['entities'][$i], $config, $config['hash']);
 
             })->then(function ($output) {
                 if (!$output[0]) {
@@ -204,29 +191,5 @@ class RedisStorageTest extends TestCase
         $this->assertEquals($config['processes'], $this->counter);
         $this->assertTrue((bool)$this->redis->exists($config['keys'][0]));
         $this->redis->del($config['keys']);
-    }
-
-    /**
-     * Create redis instance and return the result
-     *
-     * @param array $config
-     * @return bool
-     */
-    private function getRedisConnection(array $config = []): bool
-    {
-        $this->redis = new Redis();
-        $auth = $config['password'] ?? config('idempotent.redis.password');
-        if ($auth) {
-            $this->redis->auth($auth);
-        }
-
-        return $this->redis->connect(
-            $config['host'] ?? config('idempotent.redis.host'),
-            $config['port'] ?? config('idempotent.redis.port'),
-            $config['timeout'] ?? config('idempotent.redis.timeout'),
-            $config['reserved'] ?? config('idempotent.redis.reserved'),
-            $config['retryInterval'] ?? config('idempotent.redis.retryInterval'),
-            $config['readTimeout'] ?? config('idempotent.redis.readTimeout'),
-        );
     }
 }
