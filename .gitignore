@@ -7,3 +7,4 @@ report
 .DS_Store
 testbench/
 .coverage/
+.idea
