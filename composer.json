@@ -3,7 +3,7 @@
     "description": "Idempotent Package for Laravel",
     "type": "library",
     "license": "MIT",
-    "homepage": "https://github.com/sobhanatar/idempotent",
+    "homepage": "https://github.com/Haderianous/idempotent.git",
     "authors": [
         {
             "name": "Farhad jafari",
