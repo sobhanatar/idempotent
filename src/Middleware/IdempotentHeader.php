@@ -39,7 +39,7 @@ class IdempotentHeader
             return $next($request);
 
         } catch (Exception $e) {
-            return response(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],$e->getCode());
         }
     }
 }

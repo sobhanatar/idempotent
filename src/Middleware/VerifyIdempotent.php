@@ -4,8 +4,9 @@ namespace Sobhanatar\Idempotent\Middleware;
 
 use Closure;
 use Exception;
-use Illuminate\Http\{Request, Response};
+use Illuminate\Http\{JsonResponse, Request, Response};
 use Sobhanatar\Idempotent\{Config, Signature, StorageService};
+use Symfony\Component\CssSelector\Exception\InternalErrorException;
 
 class VerifyIdempotent
 {
@@ -30,9 +31,9 @@ class VerifyIdempotent
      *
      * @param Request $request
      * @param Closure $next
-     * @return Response
+     * @return JsonResponse
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next): JsonResponse
     {
         try {
             $this->config->resolveConfig($request);
@@ -43,15 +44,18 @@ class VerifyIdempotent
                 ->verify($this->config->getEntity(), $this->config->getEntityConfig(), $this->signature->getHash());
             if ($this->storageService->exists()) {
                 $response = $this->prepareResponse($this->config->getEntity(), $this->storageService->getResponse()['response']);
-                return $this->response($request, $response, (int)$this->storageService->getResponse()['code']);
+                return \response()->json(['message'=>$response],(int)$this->storageService->getResponse()['code']);
+//                return $this->response($request, $response, (int)$this->storageService->getResponse()['code']);
             }
 
             $response = $next($request);
             $storage->update($response, $this->config->getEntity(), $this->signature->getHash());
-            return $this->response($request, $response->getContent(), $response->getStatusCode());
+            return \response()->json(['message'=>$response->getContent()],$response->getStatusCode());
+//            return $this->response($request, $response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
-            return response(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return \response(['message' => $e->getMessage()],500);
+//            return response(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
