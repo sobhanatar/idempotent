@@ -22,7 +22,8 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "malkusch/lock": "^2.2",
-        "spatie/async": "^1.5"
+        "spatie/async": "^1.5",
+        "fidibo/helpers": "^4.3"
     },
     "require-dev": {
         "orchestra/testbench": "^6.23",
@@ -55,6 +56,16 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
-    }
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "repositories": [
+        {
+            "name": "fidibo/helpers",
+            "type": "vcs",
+            "url": "https://newfidi:ok4DzezhjS5hPMyzcb-j@newgit.fidibo.com/fidiborearc/php/lib/helpers.git"
+        }
+    ]
 }

@@ -39,7 +39,7 @@ class IdempotentHeader
             return $next($request);
 
         } catch (Exception $e) {
-            return response()->json(['message' => $e->getMessage()],$e->getCode());
+            return fdb_fail_api_response(__('message.fail'),__('message.fail'));
         }
     }
 }
