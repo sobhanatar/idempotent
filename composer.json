@@ -1,14 +1,14 @@
 {
-    "name": "sobhanatar/idempotent",
+    "name": "haderianous/idempotent",
     "description": "Idempotent Package for Laravel",
     "type": "library",
     "license": "MIT",
     "homepage": "https://github.com/sobhanatar/idempotent",
     "authors": [
         {
-            "name": "Sobhan Atar",
-            "email": "sobhanattar@gmail.com",
-            "homepage": "https://github.com/sobhanatar"
+            "name": "Farhad jafari",
+            "email": "fandroid.j@gmail.com",
+            "homepage": "https://github.com/Haderianous/idempotent.git"
         }
     ],
     "keywords": [
