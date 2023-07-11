@@ -44,17 +44,17 @@ class VerifyIdempotent
                 ->verify($this->config->getEntity(), $this->config->getEntityConfig(), $this->signature->getHash());
             if ($this->storageService->exists()) {
                 $response = $this->prepareResponse($this->config->getEntity(), $this->storageService->getResponse()['response']);
-                return fdb_success_api_response(__('message.progress'), [$response], 200, 1, 1);
+                return fdb_success_api_response(__('idempotent.progress'), [$response], 200, 1, 1);
 //                return $this->response($request, $response, (int)$this->storageService->getResponse()['code']);
             }
 
             $response = $next($request);
             $storage->update($response, $this->config->getEntity(), $this->signature->getHash());
-            return fdb_success_api_response(__('message.success'), ['message' => $response->getContent()], $response->getStatusCode(), 1, 1);
+            return fdb_success_api_response(__('idempotent.success'), ['message' => $response->getContent()], $response->getStatusCode(), 1, 1);
 //            return $this->response($request, $response->getContent(), $response->getStatusCode());
 
         } catch (Exception $e) {
-            return fdb_fail_api_response(__('message.fail'),__('message.fail'));
+            return fdb_fail_api_response(__('idempotent.fail'),__('idempotent.fail'));
 //            return response(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
